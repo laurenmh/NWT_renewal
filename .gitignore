@@ -1,8 +1,8 @@
 .Rproj.user
 .Rhistory
 .RData
-.csv
-.xlsx
-.xls
-.pdf
-.tiff
+*.csv
+*.xlsx
+*.xls
+*.pdf
+*.tiff
