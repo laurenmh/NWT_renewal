@@ -75,12 +75,8 @@ sppkey <- read.csv(file.path(datpath, 'pspecies.mw.data.csv')) %>%
   mutate(species=USDA_code) %>%
   select(species, USDA_family, category)
 
-myspp <- unique(dat4$species)
-sppkey2<-sppkey[which(myspp%in%sppkey$species),] %>%
-  tbl_df()
-
 #merge with composition data
-dat5 <- merge(dat4, sppkey2, id="species", all.x=T)
+dat5 <- merge(dat4, sppkey,  all.x=T)
 
 
 #read in plot-level data
@@ -98,4 +94,5 @@ famdat <- dat6 %>%
   group_by(USDA_family, plot, year, class_3) %>%
   summarize(abundance=sum(abundance))
 
-ggplot(famdat, aes(x=year, y=abundance, color=USDA_family)) + geom_line(facet_wrap(~class_3)
+ggplot(famdat, aes(x=year, y=abundance, color=USDA_family)) + 
+  geom_point() + facet_wrap(~class_3) + geom_smooth()
