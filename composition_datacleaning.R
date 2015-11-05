@@ -69,6 +69,7 @@ dat3 %>%
 dat4<- dat3 %>%
 filter(!is.na(species))
 
+
 #read in species key
 sppkey <- read.csv(file.path(datpath, 'pspecies.mw.data.csv')) %>%
   tbl_df() %>%
@@ -89,6 +90,7 @@ plotkey2 <-plotkey %>%
 #merge with composition data
 dat6 <-merge(dat5, plotkey2)
 
+
 #aggregate by family
 famdat <- dat6 %>%
   group_by(USDA_family, plot, year, class_3) %>%
@@ -96,3 +98,21 @@ famdat <- dat6 %>%
 
 ggplot(famdat, aes(x=year, y=abundance, color=USDA_family)) + 
   geom_point() + facet_wrap(~class_3) + geom_smooth()
+
+
+myout<-turnover(dat4, time.var="year", species.var = "species", abundance.var= "abundance", replicate.var="plot")
+myappear<-turnover(dat4, time.var="year", species.var = "species", abundance.var= "abundance", replicate.var="plot", metric="appearance")
+mydisappear<-turnover(dat4, time.var="year", species.var = "species", abundance.var= "abundance", replicate.var="plot", metric="disappearance")
+
+head(myappear)
+
+
+
+myout2<-merge(myout, plotkey2)
+
+myout3<-merge(myout2, myappear)
+myout4<-merge(myout3, mydisappear) %>%
+  filter(class_3!="SF", class_3!="SF", class_3!="ST")
+
+ggplot(myout4, aes(x=year, y=total, group=plot)) + geom_line() + facet_wrap(~class_3) + theme_bw()
+ggplot(myout4, aes(x=year, y=appearance, group=plot)) + geom_line() + facet_wrap(~class_3)+ theme_bw()
