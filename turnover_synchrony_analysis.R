@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(codyn)
 
 #Turnover and synchrony calculations for Niwot Ridge saddle data
 ##Use saddat from gridComposition_datacleaning
