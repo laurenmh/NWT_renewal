@@ -1,5 +1,8 @@
 
 library(ggplot2)
+library(dplyr)
+
+#### Fit model to correct for differences in cushion plant harvest methods ####
 
 cushion<-read.csv("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/SaddleNPP/saddle_grid_biomass_2015.working.csv")
 head(cushion)
@@ -10,81 +13,62 @@ comtype$class_3
 cushion2<-merge(cushion,comtype,by=c("plot"))
 head(cushion2)
 
+#I tried a lot of different model formulations, but the modified logistic fit the best especially at low totalgm2 values (which we have a lot of in the dataset we have to convert). most models went above the 1:1 line at low totalmg2 values which would mean that the woody+green biomass is less than the green only biomass. Note that the modified logistic model gives negative biomass values for totalgm2 < 36. This is not a problem because our lowest value to convert is 39.7
+
 ggplot(cushion2)+
   aes(x=totalgm2,y=alllivegm2)+ theme_classic()+
   geom_point() +
-  stat_smooth(method = 'nls', formula = 'y~a*x^b', start = list(a=1,b=1),se=FALSE)
-#+ geom_smooth() #+ facet_wrap(~class_3)
+  stat_smooth(method = 'nls', formula = 'y~a/(1+exp(-b*x))-c', start = list(a=107,b=.005,c=100),se=FALSE)
 
-#fit a model that forces through 0,0 and is monotonic increasing (but doesn't asymtote). rationale is that cushion volume (woody) will increase to the third power and cusion area (live, green) will increase to the squared power.
-mymod<-nls(alllivegm2~a*totalgm2^b,start=list(a=7,b=1),data=cushion2)
-nullmod<-nls(alllivegm2~a*totalgm2^0,start=list(a=1),data=cushion2)
+mymod<-nls(alllivegm2~a/(1+exp(-b*totalgm2))-c,start=list(a=107,b=.005,c=100),data=cushion2,trace=T,nls.control(maxiter=10000,tol=0.00008,minFactor=0.00001))
+nullmod<-nls(alllivegm2~a/(1+exp(-0*totalgm2))-0,start=list(a=1),data=cushion2)
 
 #check that ggplot is giving the same curve as nls(), yes.
-plot(cushion2$totalgm2,cushion2$alllivegm2,col=cushion2$class_3,pch=16,xlim=c(50,700),ylim=c(0,350),cex=.5)
-curve(14.8346*x^0.4396,add=T,col=1)
+plot(cushion2$totalgm2,cushion2$alllivegm2,pch=16,xlim=c(0,700),ylim=c(0,350),cex=.5)
+curve(530.48918/(1+exp(-.01106*(x)))-316.70505,add=T,col=3) #modified logistic model
+curve(327.5/(1+exp(-0*(x)))-0,add=T,col=3) #null model (mean)
+abline(a=0,b=1) #the curve should be lower than the 1:1 line
 
-#calculate R2: sometimes R2 is not valid in nonlinear models, but it is valid in this case because the null model is nested within the full model
+#other models I tried
+#curve((81.78685*log(x)-279.41985),add=T,col=2) #secound choice
+#curve(14.8346*x^0.4396,add=T,col=1)
+#curve(14.8346*(x-30)^0.4396,add=T,col=1) #model won't fit in nls
+#curve(235.48*(1-exp(-0.00547*x)),add=T,col=5)
+#curve((318*x)/(210+x),add=T,col=5)
+
+#calculate R2 and p value: sometimes R2 is not valid in nonlinear models, but it is valid in this case because the null model is nested within the full model
 RSS <- sum(residuals(mymod)^2)
 TSS <- sum((cushion2$alllivegm2 - mean(cushion2$alllivegm2))^2)
-1 - (RSS/TSS) #R2 = 0.426
-
-anova(nullmod,mymod,test="F")#the F test uses mean squares to compare fit, P=0.00003
-
-
-
-#
+1 - (RSS/TSS) #R2 = 0.522
+anova(nullmod,mymod,test="F")#the F test uses mean squares to compare fit, P=0.00001
 
 
 
 
 
 
+#### Apply the correction model to snowprod for dm and ff plots for years prior to 2008 ####
+
+snowprod<-read.csv("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/wholesite/NWT_SnowXProd.csv",na.strings = c("."))
+snowprod$plot<-as.factor(snowprod$plot)
+#I'm leaving plot 51 in for now, it is an outlier in terms of snowdepth not ff community or prod  #snowprod$anpp[which(snowprod$plot=="51")]<-NA
+
+#apply the correction to the DM/FF yr<2008 plots, then rbind everything back together again
+snowprodsub1<-snowprod %>%
+  filter(class_3=="DM"|class_3=="FF",year<2008) %>%
+  filter(!is.na(anpp)) %>%
+  rename(anppold=anpp) %>%
+  mutate(anpp=530.48918/(1+exp(-.01106*(anppold)))-316.70505)
+snowprodsub1$anppold<-NULL
+
+snowprodsub2<-snowprod %>%
+  filter(class_3=="DM"|class_3=="FF",year>=2008) %>%
+  filter(!is.na(anpp))
+
+snowprodsub3<-snowprod %>%
+  filter(class_3=="MM"|class_3=="SB"|class_3=="WM") %>%
+  filter(!is.na(anpp))
+
+snowprodcor<-arrange(rbind(snowprodsub1,snowprodsub2,snowprodsub3),year,sort_num)
 
 
-abline(lm(alllivegm2~totalgm2,data=cushion2dm),col=1)
-abline(lm(alllivegm2~totalgm2,data=cushion2ff),col=2)
-legend(600,350,c("DM","FF","MM"),pch=16,col=c(1,2,3),box.col ="white")
-
-
-cushion2dm<-subset(cushion2,class_3=="DM")
-cushion2ff<-subset(cushion2,class_3=="FF")
-
-plot(cushion2dm$totalgm2,cushion2dm$alllivegm2,col=1)
-plot(cushion2ff$totalgm2,cushion2ff$alllivegm2,col=2)
-
-summary(lm(alllivegm2~totalgm2,data=cushion2))
-summary(lm(alllivegm2~totalgm2,data=cushion2dm))
-summary(lm(alllivegm2~totalgm2,data=cushion2ff))
-summary(nls(alllivegm2~a*totalgm2^b,data=cushion2ff))
-curve(15.0732*x^.4175,add=T)
-
-dmcushionintercept<-lm(alllivegm2~totalgm2,data=cushion2dm)$coefficients[1]
-dmcushionslope<-lm(alllivegm2~totalgm2,data=cushion2dm)$coefficients[2]
-ffcushionintercept<-lm(alllivegm2~totalgm2,data=cushion2ff)$coefficients[1]
-ffcushionslope<-lm(alllivegm2~totalgm2,data=cushion2ff)$coefficients[2]
-
-dmcushionintercept+dmcushionslope*260.01#looks ok
-
-
-#start with snowprod and do a correction for dm and ff plots for years prior to 2008
-snowprodcor<-read.csv("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/wholesite/NWT_SnowXProd.csv",na.strings = c("."))
-snowprodcor$plot<-as.factor(snowprodcor$plot)
-#take out plot 51 outlier, I'm leavng this in for now, it is an outlier in terms of snowdepth not ff community or prod
-#snowprodcor$anpp[which(snowprodcor$plot=="51")]<-NA
-snowprodcor$anppcor<-snowprodcor$anpp
-ind<-which(snowprodcor$class_3=="DM"&snowprodcor$year<2008)
-snowprodcor$anppcor[ind]<-dmcushionintercept+dmcushionslope*snowprodcor$anpp[ind]
-ind<-which(snowprodcor$class_3=="FF"&snowprodcor$year<2008)
-snowprodcor$anppcor[ind]<-ffcushionintercept+ffcushionslope*snowprodcor$anpp[ind]
-snowprodcor[ind,]
-
-prodcormeans<-aggregate.data.frame(snowprodcor$anppcor,by=list(year=snowprodcor$year,class_3=snowprodcor$class_3),function(x){mean(x,na.rm=T)})
-prodcormeansshort<-cast(prodcormeans,year~class_3,value="x",fun=mean)
-prodcormeansshort$rock<-NULL
-prodcormeansshort$ST<-NULL
-prodcormeansshort$SF<-NULL
-colnames(prodcormeansshort)<-c("water_year","DMprod","FFprod","MMprod","SBprod","WMprod")
-prodcormeanall<-aggregate.data.frame(snowprodcor$anppcor,by=list(year=snowprodcor$year),function(x){mean(x,na.rm=T)})
-
-prodcormeansshort2<-cbind(prodcormeansshort,prodtot=prodcormeanall$x)
