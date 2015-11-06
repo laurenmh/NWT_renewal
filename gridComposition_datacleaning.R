@@ -69,3 +69,49 @@ saddat %>%
 # Not sure what to do about the 14 points of unknown matt
 #saddat %>%
  # filter(USDA_code=="2UNKMA")
+
+#Summarize abundance at the species and functional group level
+aggdat<- merge(saddat, vegtype.key, by="plot") %>%
+  filter(is_veg > 0, category != "nonveg") %>%
+  group_by(year, plot, USDA_code, orig_cluster, class_3, category, func) %>%
+  summarize(abund=sum(abund)) %>%
+  tbl_df() 
+
+#create a key to merge
+sampled_plots <- saddat %>%
+  select(plot, year) %>%
+  unique()
+
+aggdat2<-merge(aggdat, sampled_plots, id=c("plot", "year"), all.y=T)
+
+# a function to fill in 0s for species present in the plot but not that year
+fill_zeros <- function (df, year="year", USDA_code="USDA_code", abund="abund") {
+  nosp <- length(unique(df[,USDA_code]))
+  df2 <- df[c(year, USDA_code, abund)] %>%
+    spread(USDA_code, abund, fill=0) %>%
+    gather(USDA_code, abund, 2:(nosp+1))
+  return(df2)
+}
+
+# apply the fill_zeros function across aggdat2
+X <- split(aggdat2, aggdat2$plot)
+out <- lapply(X, FUN=fill_zeros)
+ID <- unique(names(out))
+out <- mapply(function(x, y) "[<-"(x, "plot", value = y) ,
+              out, ID, SIMPLIFY = FALSE)
+aggdat3 <- do.call("rbind", out) %>%
+  tbl_df()
+
+#how many plots had absolutely nothing ever
+aggdat3 %>%
+  filter(is.na(USDA_code)) %>%
+  select(plot) %>%
+  unique() %>%
+  nrow()
+
+sppdat0<- merge(aggdat3, sppkey) %>%
+  filter(!is.na(USDA_code)) %>%
+  tbl_df() 
+
+sppdat <-merge(sppdat0, vegtype.key) %>%
+  tbl_df()
