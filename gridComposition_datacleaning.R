@@ -40,10 +40,35 @@ saddat<- merge(rawdat, sppkey, all.x=T) %>%
   mutate(plot_point_hit = paste(plot, point, hit_type, sep="_")) %>%
   mutate(abund=1) %>%
   tbl_df() %>%
-  mutate(func="Forb", func=ifelse())
+  mutate(func="Forb", func=ifelse(Weber_family=="Cyperaceae", "Sedge", func), 
+         func=ifelse(Weber_family=="Poaceae", "Grass", func),
+         func=ifelse(Weber_family=="Fabaceae", "Legume", func),
+         func=ifelse(is_veg==0, "Nonveg", func),
+         func=ifelse(USDA_code=="2GRAM", "Grass", func),
+         func=ifelse(USDA_code=="2LICHN", "Lichen", func),
+         func=ifelse(USDA_code=="2MOSS", "Moss", func),
+         func=ifelse(USDA_code=="2UNKCU", "Forb", func),
+         func=ifelse(USDA_code=="2UNKCU", "Forb", func),
+         func=ifelse(USDA_code=="2UNKGM", "Nonveg", func),
+         func=ifelse(USDA_code=="2UNKSC", "Nonveg", func),
+         func=ifelse(USDA_code=="2UNKGS", "Nonveg", func),
+         func=ifelse(USDA_code=="2UNKSC", "Nonveg", func),
+         func=ifelse(category=="lichen", "Lichen", func),
+         func=ifelse(category=="moss", "Moss", func))
 
-unique(saddat$Weber_family)
+#Assign the unknowns to functional groups
+saddat %>%
+  filter(Weber_family=="N/A" & func !="Nonveg") %>%
+  select(USDA_code) %>%
+  unique
 
+saddat %>%
+  select(category)%>%
+  unique()
+
+# Not sure what to do about the 14 points of unknown matt
+#saddat %>%
+ # filter(USDA_code=="2UNKMA")
 
 #calculate "turnover" - will only give 2 values - 1 if the species changed, 0 if it did not
 #for right now, included bare as a "species" - should do a more refined analysis of transitions from bare to veg, and veg to bare
