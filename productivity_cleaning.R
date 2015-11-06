@@ -1,10 +1,13 @@
+#This code corrects the productivity data for differences in cushion plant harvesting methods - output clean file is "NWT_SnowXProdCorrected.csv"
 
 library(ggplot2)
 library(dplyr)
 
+
+
 #### Fit model to correct for differences in cushion plant harvest methods ####
 
-cushion<-read.csv("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/SaddleNPP/saddle_grid_biomass_2015.working.csv")
+cushion<-read.csv("~/Dropbox/NWT_data/saddle_grid_biomass_2015.working.csv")
 head(cushion)
 
 comtype<-read.csv("~/Dropbox/NWT_data/NWT_Saddle_ComType.csv")
@@ -45,11 +48,9 @@ anova(nullmod,mymod,test="F")#the F test uses mean squares to compare fit, P=0.0
 
 
 
-
-
 #### Apply the correction model to snowprod for dm and ff plots for years prior to 2008 ####
 
-snowprod<-read.csv("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/wholesite/NWT_SnowXProd.csv",na.strings = c("."))
+snowprod<-read.csv("~/Dropbox/NWT_data/NWT_SnowXProd.csv",na.strings = c("."))
 snowprod$plot<-as.factor(snowprod$plot)
 #I'm leaving plot 51 in for now, it is an outlier in terms of snowdepth not ff community or prod  #snowprod$anpp[which(snowprod$plot=="51")]<-NA
 
@@ -70,5 +71,5 @@ snowprodsub3<-snowprod %>%
   filter(!is.na(anpp))
 
 snowprodcor<-arrange(rbind(snowprodsub1,snowprodsub2,snowprodsub3),year,sort_num)
-
+write.csv(snowprodcor,"~/Dropbox/NWT_data/NWT_SnowXProdCorrected.csv",row.names=F)
 
