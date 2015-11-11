@@ -138,10 +138,42 @@ funcdatmean <- meanfuncdat %>%
  
  dev.off()
  
+
  
+##and now look at aggregate cover across habitat types
+ cortotdat <- aggdat %>%
+   filter(func !="Nonveg") %>%
+   group_by(year, plot,  class_3) %>%
+   summarize(abund=sum(abund)) %>%
+   tbl_df() %>%
+   filter(class_3 != "SF", class_3 !="ST", class_3!="rock") %>%
+   mutate(plot=paste(class_3, plot, sep="_"))  %>%
+   select(-class_3) %>%
+   spread(plot, abund, fill=0) %>%
+   tbl_df()
  
+ pdf("corr_totcover.pdf")
+ corrgram(cortotdat[,2:ncol(cortotdat)], order=NULL, upper.panel=panel.shade,
+          lower.panel=NULL)
+ dev.off()
  
+ cortotdat <- aggdat %>%
+   filter(func !="Nonveg") %>%
+   group_by(year, plot,  class_3) %>%
+   summarize(abund=sum(abund)) %>%
+   tbl_df() %>%
+   group_by(year, class_3) %>%
+   summarize(abund=mean(abund)) %>%
+   filter(class_3 != "SF", class_3 !="ST", class_3!="rock") %>%
+   #mutate(plot=paste(class_3, plot, sep="_"))  %>%
+  # select(-class_3) %>%
+   spread(class_3, abund, fill=0) %>%
+   tbl_df()
  
+ pdf("corr_totcover_mean.pdf")
+ corrgram(cortotdat[,2:ncol(cortotdat)], order=NULL, upper.panel=panel.shade,
+          lower.panel=NULL)
+ dev.off()
  
  #synchrony at the species level
 corsppdat <- aggdat %>%
@@ -149,7 +181,8 @@ corsppdat <- aggdat %>%
   summarize(abund=mean(abund)) %>%
   tbl_df() %>%
   filter(class_3 != "SF", class_3 !="ST", class_3!="rock") %>%
-  mutate(plot=paste(class_3, plot, sep="_"))
+  mutate(plot=paste(class_3, plot, sep="_")) 
+
 
 #look at some example species, GEROT and DECE, etc...
 subsppdat<-corsppdat %>%
