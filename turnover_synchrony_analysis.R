@@ -83,8 +83,31 @@ websynch2 <- merge(websynch, vegtype.key, by="plot") %>%
 #ggplot(websynch2, aes(x=synchrony)) + geom_bar() + facet_wrap(~orig_cluster)
 ggplot(websynch2, aes(x=synchrony)) + geom_bar() + facet_wrap(~class_3)
 
+
+
+
+#synchrony at the functional group  level
+#lots of Weber_family =="N/A", check this
+datfunc<- merge(saddat, vegtype.key, by="plot") %>%
+  filter(is_veg > 0, category != "nonveg") %>%
+  filter(class_3 != "SF", class_3 != "ST") %>%
+  group_by(year, plot,  orig_cluster, class_3, func) %>%
+  summarize(abund=sum(abund)) %>%
+  tbl_df() 
+
+
+ggplot(datfunc, aes(x=year, y=abund, color=func,  group=interaction(plot, func))) + geom_line() + facet_wrap(~class_3) + theme_bw()
+
+funcsynch <- synchrony(datfunc, time.var="year", species.var = "func", abundance.var="abund", replicate.var="plot")
+funcsynch2 <- merge(websynch, vegtype.key, by="plot") %>%
+  mutate(type="function")
+
+#ggplot(websynch2, aes(x=synchrony)) + geom_bar() + facet_wrap(~orig_cluster)
+ggplot(funcsynch2, aes(x=synchrony)) + geom_bar() + facet_wrap(~class_3)
+
+
 #Put all the synchrony outputs together, make a panel graph
-aggsynch <- rbind(sppsynch2, catsynch2, websynch2) %>%
+aggsynch <- rbind(sppsynch2, catsynch2, funcsynch2) %>%
   filter(class_3 != "SF", class_3 !="ST", class_3!="rock")
 ggplot(aggsynch, aes(x=synchrony)) + geom_bar() + facet_grid(type~class_3) + theme_bw()
 
@@ -103,12 +126,33 @@ datcat2 <- datcat %>%
   mutate(type="category") 
 names(datcat2)[5]="mylevel"
 
-datgraph <- rbind(datspp2, datweb2, datcat2)  %>%
+datfunc2 <- datfunc %>%
+  mutate(type="functional") 
+names(datfunc2)[5]="mylevel"
+
+
+datgraph <- rbind(datspp2, datfunc2, datcat2)  %>%
   filter(class_3 != "SF", class_3 !="ST", class_3!="rock")
 
-
+pdf("raw_synch_graphs.pdf", paper="a4r", width=10)
 ggplot(datgraph, aes(x=year, y=abund, color=mylevel, group=interaction(mylevel, plot))) + 
-  geom_line() + facet_grid(type~class_3) + theme_bw() + theme(legend.position="none")
-ggplot(aggsynch, aes(x=synchrony)) + geom_bar() + facet_grid(type~class_3) + theme_bw()
+  geom_line() + facet_grid(type~class_3) + theme_bw() + theme(legend.position="none") + labs(x="Year", y="Abundance")
+
+ggplot(aggsynch, aes(x=synchrony)) + geom_bar() + facet_grid(type~class_3) + theme_bw()+
+  labs(x="Synchrony", y="Count")
+dev.off()
 
 
+##look at aggregate cover over time
+datagg<- merge(saddat, vegtype.key, by="plot") %>%
+  filter(is_veg > 0, category != "nonveg") %>%
+  filter(class_3 != "SF", class_3 != "ST") %>%
+  group_by(year, plot,  orig_cluster, class_3) %>%
+  summarize(abund=sum(abund)) %>%
+  tbl_df() %>%
+  filter(class_3!="rock")
+
+pdf("aggcover.pdf")
+ggplot(datagg, aes(x=year, y=abund, color=class_3,  group=plot)) + geom_line() +
+  facet_wrap(~class_3, ncol=2) + theme_bw() + theme(legend.position="none") + labs(x="Year", y="Total cover")
+dev.off()
