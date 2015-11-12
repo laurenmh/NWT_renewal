@@ -9,14 +9,15 @@ library(codyn)
 datpath = "~/Dropbox/NWT_data/" # this likely will be different for different folks
 
 #read in the data
-rawdat <- read.csv(file.path(datpath, 'saddle_grid_point_quadrat_89-13.csv')) %>%
+rawdat <- read.csv(file.path(datpath, 'saddle_grid_point_quadrat_89-14_single_col_format_PRELIM-1.csv')) %>%
   tbl_df() %>%
   select(year, plot, point, hit_type, USDA_code) %>%
   #Hope's species conversion key doesn't include "CAREX1-CAREX3" so renaming them all CAREX
   mutate(USDA_code=as.character(USDA_code),
          USDA_code = ifelse(USDA_code=="CAREX1", "CAREX", USDA_code),
          USDA_code = ifelse(USDA_code=="CAREX2", "CAREX", USDA_code),
-         USDA_code = ifelse(USDA_code=="CAREX3", "CAREX", USDA_code))
+         USDA_code = ifelse(USDA_code=="CAREX3", "CAREX", USDA_code),
+         USDA_code = ifelse(USDA_code=="CAREX4", "CAREX", USDA_code))
 
 #create a unique species key
 sppkey<-read.csv(file.path(datpath, "pspecies.mw.data.csv")) %>%
@@ -34,12 +35,15 @@ vegtype.key <- read.csv(file.path(datpath, 'NWT_Saddle_ComType.csv')) %>%
 #for now I am removing all but the bottom, because there aren't always top hits 
 #will need to fill those in as 0s in future, or find another way to think about them
 saddat<- merge(rawdat, sppkey, all.x=T) %>%
-  filter(hit_type!="middle1", hit_type!="middle2") %>%
-  filter(hit_type=="bottom") %>%
+  #filter(hit_type!="middle1", hit_type!="middle2") %>%
+  #filter(hit_type=="bottom") %>%
   select(year, plot, point, USDA_code, USDA_name, hit_type, is_veg, category, Weber_family) %>%
   mutate(plot_point_hit = paste(plot, point, hit_type, sep="_")) %>%
   mutate(abund=1) %>%
   tbl_df() %>%
+  mutate(category=as.character(category),
+         #Decided that of the 21 unknown points, most likely are vascular and forb
+         category=ifelse(USDA_code=="2UNK", "vascular", category)) %>%
   mutate(func="Forb", func=ifelse(Weber_family=="Cyperaceae", "Sedge", func), 
          func=ifelse(Weber_family=="Poaceae", "Grass", func),
          func=ifelse(Weber_family=="Fabaceae", "Legume", func),
@@ -54,7 +58,16 @@ saddat<- merge(rawdat, sppkey, all.x=T) %>%
          func=ifelse(USDA_code=="2UNKGS", "Nonveg", func),
          func=ifelse(USDA_code=="2UNKSC", "Nonveg", func),
          func=ifelse(category=="lichen", "Lichen", func),
-         func=ifelse(category=="moss", "Moss", func))
+         func=ifelse(category=="moss", "Moss", func),
+         func=ifelse(USDA_code=="SIACS2", "Cushion", func),
+         func=ifelse(USDA_code=="MIOB2", "Cushion", func),
+         func=ifelse(USDA_code=="MIRU3", "Cushion", func),
+         func=ifelse(USDA_code=="PHPU5", "Cushion", func),
+         func=ifelse(USDA_code=="DRBRC", "Cushion", func),
+         #decided that cushion more important than legume for Trifolium nanum
+         func=ifelse(USDA_code=="TRNA2", "Cushion", func),
+         func=ifelse(USDA_code=="ERNA", "Cushion", func), 
+         func=ifelse(Weber_family=="Salicaceae", "Woody", func))
 
 #Assign the unknowns to functional groups
 saddat %>%
@@ -62,20 +75,56 @@ saddat %>%
   select(USDA_code) %>%
   unique
 
-saddat %>%
-  select(category)%>%
+chksaddat <- saddat %>%
+  select(USDA_code, USDA_name, category, func, Weber_family)%>%
   unique()
+
+##middle2 only hpanned 109 times, and always there was an associated middle1
+saddat5 <- saddat %>%
+  filter(hit_type=="middle1" | hit_type=="middle2") %>%
+  select(hit_type, plot, point, year) %>%
+  unique() %>%
+ mutate(abund=1) %>%
+  spread(hit_type, abund) %>%
+  mutate(midtog= middle1 + middle2) %>%
+  filter(midtog==2)
+
+saddat6 <- saddat %>%
+#  filter(hit_type=="middle1" | hit_type=="middle2") %>%
+  select(hit_type, plot, point, year, func) %>%
+  spread(hit_type, func) %>%
+  mutate(count=1) %>%
+  group_by(bottom, middle1, middle2, top) %>%
+  summarize(count=sum(count))
+
 
 # Not sure what to do about the 14 points of unknown matt
 #saddat %>%
  # filter(USDA_code=="2UNKMA")
 
-#Summarize abundance at the species and functional group level
-aggdat<- merge(saddat, vegtype.key, by="plot") %>%
+# #Summarize abundance at the species and functional group level
+# aggdat<- merge(saddat, vegtype.key, by="plot") %>%
+#   filter(is_veg > 0, category != "nonveg") %>%
+#   group_by(year, plot, USDA_code, orig_cluster, class_3, category, func) %>%
+#   summarize(abund=sum(abund)) %>%
+#   tbl_df() 
+
+#Summarize abundace at the species and functional level; exclude middle
+aggdat <- merge(saddat, vegtype.key, by="plot") %>%
   filter(is_veg > 0, category != "nonveg") %>%
+  filter(hit_type !="middle1", hit_type != "middle2") %>%
   group_by(year, plot, USDA_code, orig_cluster, class_3, category, func) %>%
   summarize(abund=sum(abund)) %>%
   tbl_df() 
+
+
+#Alternatively, summarize by level
+aggdat_byhittype <- merge(saddat, vegtype.key, by="plot") %>%
+  filter(is_veg > 0, category != "nonveg") %>%
+  group_by(year, plot, USDA_code, orig_cluster, class_3, category, func, hit_type) %>%
+  summarize(abund=sum(abund)) %>%
+  tbl_df() 
+
 
 #create a key to merge
 sampled_plots <- saddat %>%
