@@ -6,12 +6,19 @@ library(codyn)
 #Turnover and synchrony calculations for Niwot Ridge saddle data
 ##Use saddat from gridComposition_datacleaning
 
+##Let's remove the middle points for consistancy
+saddat <- saddat %>%
+  filter(hit_type != "middle1", hit_type!= "middle2")
+
 #calculate "turnover" - will only give 2 values - 1 if the species changed, 0 if it did not
 #for right now, included bare as a "species" - should do a more refined analysis of transitions from bare to veg, and veg to bare
-sadturn<-turnover(saddat, time.var="year", species.var = "USDA_code", abundance.var = "abund", replicate.var = "plot_point_hit")
+saddat_bottom<-saddat %>%
+  filter(hit_type=="bottom")
+
+sadturn<-turnover(saddat_bottom, time.var="year", species.var = "USDA_code", abundance.var = "abund", replicate.var = "plot_point_hit")
 
 #aggregate turnover within a plot, only use those years for which turnover was calculated for the immediate year prior
-sadturn2<-merge(sadturn, saddat, all.x=T) %>%
+sadturn2<-merge(sadturn, saddat_bottom, all.x=T) %>%
   group_by(year, plot) %>%
   summarize(percent_change=sum(total)) %>%
   filter(year==1996 | year == 1997 | year==1990 | year == 2011 | year ==2012 | year ==2013)
@@ -20,7 +27,7 @@ sadturn2<-merge(sadturn2, vegtype.key, by="plot")
 
 #aggregate turnover within a plot and by rough veg type, only use those years for which turnover was calculated for the immediate year prior
 #percent_change now a misnomer - total, percent varies based on how much was bare versus veg initially
-sadturn3<-merge(sadturn, saddat, all.x=T) %>%
+sadturn3<-merge(sadturn, saddat_bottom, all.x=T) %>%
   group_by(year, plot, is_veg) %>%
   summarize(percent_change=sum(total)) %>%
   filter(year==1996 | year == 1997 | year==1990 | year == 2011 | year ==2012 | year ==2013) %>%
@@ -36,7 +43,7 @@ ggplot(sadturn3, aes(x=year, y=percent_change, group=plot)) + geom_point() + fac
 #synchrony at the species level
 datspp<- merge(saddat, vegtype.key, by="plot") %>%
   filter(is_veg > 0, category != "nonveg") %>%
-  group_by(year, plot, USDA_code, orig_cluster, class_3, category, Weber_family) %>%
+  group_by(year, plot, USDA_code, orig_cluster, class_3, category, Weber_family, func) %>%
   summarize(abund=sum(abund)) %>%
   tbl_df() 
 
@@ -115,7 +122,7 @@ ggplot(aggsynch, aes(x=synchrony)) + geom_bar() + facet_grid(type~class_3) + the
 #Put all the raw data together, make a panel graph
 datspp2 <- datspp %>%
   mutate(type="species") %>%
-  select(-Weber_family, - category)
+  select(-Weber_family, - category, -func)
 names(datspp2)[3]="mylevel"
 
 datweb2 <- datweb %>%
@@ -142,6 +149,9 @@ ggplot(aggsynch, aes(x=synchrony)) + geom_bar() + facet_grid(type~class_3) + the
   labs(x="Synchrony", y="Count")
 dev.off()
 
+
+ggplot(subset(datgraph, type=="functional"), aes(x=year, y=abund, color=mylevel, group=interaction(mylevel, plot))) + 
+  geom_line() + facet_grid(type~class_3) + theme_bw()  + labs(x="Year", y="Abundance")
 
 ##look at aggregate cover over time
 datagg<- merge(saddat, vegtype.key, by="plot") %>%
