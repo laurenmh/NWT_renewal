@@ -4,13 +4,14 @@ library(corrgram)
 #Highlights whether different habitat types have synchronous or asynchronous responses within functional groups
 
 ##Use saddat from gridComposition_datacleaning
-
-#Summarize abundance at the species and functional group level
-aggdat<- merge(saddat, vegtype.key, by="plot") %>%
-  filter(is_veg > 0, category != "nonveg") %>%
-  group_by(year, plot, USDA_code, orig_cluster, class_3, category, func) %>%
-  summarize(abund=sum(abund)) %>%
-  tbl_df() 
+# 
+# #Summarize abundance at the species and functional group level
+# aggdat <- merge(saddat, vegtype.key, by="plot") %>%
+#   filter(is_veg > 0, category != "nonveg") %>%
+#   filter(hit_type !="middle1", hit_type != "middle2") %>%
+#   group_by(year, plot, USDA_code, orig_cluster, class_3, category, func) %>%
+#   summarize(abund=sum(abund)) %>%
+#   tbl_df() 
 
 #Summarize abundance at the functional group level
 corfuncdat <- aggdat %>%
@@ -38,7 +39,7 @@ corfuncdat <- aggdat %>%
 
 
 #Create a pdf of correlograms by functional group
-pdf("Correlograms_byFunctionalGroup.pdf")
+pdf("Correlograms_byFunctionalGroup_withtop.pdf")
 funcgroups<-unique(corfuncdat$func)[-7]
 
 for (i in 1:length(funcgroups)) {
@@ -66,7 +67,7 @@ meanfuncdat <- aggdat %>%
   summarize(abund=mean(abund)) %>%
   filter(class_3 != "SF", class_3 !="ST", class_3!="rock") 
 
-pdf("Correlograms_meanFuncHabitat.pdf")
+pdf("Correlograms_meanFuncHabitat_withtop.pdf")
 funcdatmean <- meanfuncdat %>%
   mutate(plot=paste( func,class_3, sep="_")) %>%
   tbl_df() %>%
@@ -120,7 +121,7 @@ funcdatmean <- meanfuncdat %>%
  
  
  #Create a pdf of correlograms by functional group averaged within habitat type
- pdf("Correlograms_byMeanFunctionalGroup.pdf")
+ pdf("Correlograms_byMeanFunctionalGroup_withtop.pdf")
  funcgroups<-unique(corfuncdat$func)[-7]
  
  for (i in 1:length(funcgroups)) {
@@ -152,7 +153,7 @@ funcdatmean <- meanfuncdat %>%
    spread(plot, abund, fill=0) %>%
    tbl_df()
  
- pdf("corr_totcover.pdf")
+ pdf("corr_totcover_withtop.pdf")
  corrgram(cortotdat[,2:ncol(cortotdat)], order=NULL, upper.panel=panel.shade,
           lower.panel=NULL)
  dev.off()
@@ -170,7 +171,7 @@ funcdatmean <- meanfuncdat %>%
    spread(class_3, abund, fill=0) %>%
    tbl_df()
  
- pdf("corr_totcover_mean.pdf")
+ pdf("corr_totcover_mean_withtop.pdf")
  corrgram(cortotdat[,2:ncol(cortotdat)], order=NULL, upper.panel=panel.shade,
           lower.panel=NULL)
  dev.off()
@@ -186,11 +187,45 @@ corsppdat <- aggdat %>%
 
 #look at some example species, GEROT and DECE, etc...
 subsppdat<-corsppdat %>%
-  filter(USDA_code=="DECE") %>%
+  filter(USDA_code=="GEROT") %>%
   select(-class_3) %>%
+  mutate(count=1) %>%
+  group_by(plot) %>%
+  mutate(count=sum(count), totabund=sum(abund))%>%
+  filter(count>8, totabund >100) %>%
+  select(-count, -totabund) %>%
   spread(plot, abund, fill=0) %>%
   tbl_df()
 
 
 corrgram(subsppdat[,3:ncol(subsppdat)], order=NULL, upper.panel=panel.shade,
-         lower.panel=NULL)
+         lower.panel=NULL, main="Geum")
+
+subsppdat<-corsppdat %>%
+  filter(USDA_code=="DECE") %>%
+  select(-class_3) %>%
+  group_by(plot) %>%
+  mutate(count=1) %>%
+  mutate(count=sum(count), totabund=sum(abund)) %>%
+  filter(count>8, totabund >50) %>%
+  select(-count, -totabund) %>%
+  spread(plot, abund, fill=0) %>%
+  tbl_df()
+
+corrgram(subsppdat[,3:ncol(subsppdat)], order=NULL, upper.panel=panel.shade,
+         lower.panel=NULL, main="Deschampsia")
+
+subsppdat<-corsppdat %>%
+  filter(USDA_code=="SIACS2") %>%
+  select(-class_3) %>%
+  mutate(count=1) %>%
+  group_by(plot) %>%
+  mutate(count=sum(count), totabund=sum(abund)) %>%
+  filter(count>4, totabund >10) %>%
+  select(-count, -totabund) %>%
+  spread(plot, abund, fill=0) %>%
+  tbl_df()
+
+corrgram(subsppdat[,3:ncol(subsppdat)], order=NULL, upper.panel=panel.shade,
+         lower.panel=NULL, main="Silene")
+
