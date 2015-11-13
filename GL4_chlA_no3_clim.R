@@ -46,14 +46,14 @@ ggplot((GL4_clim), aes(x=sumallPC1, y=MaxChlA)) + geom_point() + geom_smooth(met
 
 #Nice visual of just the lake depths (which have more data than the inlet and outlet)
 #includes the high values (which I think are artifacts of high inputs, need to check with Kathi)
-ChlA_panel_withoutlier<- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA)) + 
+ChlA_panel_withoutlier<- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet"), aes(x=sumallPC1, y=MaxChlA)) + 
   geom_point() + geom_smooth(method="lm") + facet_wrap(~Depth, ncol=1, scale="free_x")  +
   theme_classic() + theme(strip.background = element_blank(), text=element_text(size=16)) +
   labs(x="PC1 (Length of summer)", y = "Max Chlorophyll A")
 
-# tiff("ChlA_panel_withoutlier.tiff", height=900, width=400)
-# ChlA_panel_withoutlier
-# dev.off()
+#  tiff("ChlA_panel_withoutlier.tiff", height=900, width=400)
+#  ChlA_panel_withoutlier
+#  dev.off()
 
 #quick regressions
 l<-lm(MaxChlA~sumallPC1, subset(GL4_clim, Depth==9 & MaxChlA<10))
@@ -65,14 +65,14 @@ summary(l)
 
 #Nice visual of just the lake depths (which have more data than the inlet and outlet)
 #Removed the really high ChL because it looks like that was a product of a high inlet value
- ChlA_panel_nooutlier <- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet"), aes(x=sumallPC1, y=MaxChlA)) + 
+ ChlA_panel_nooutlier <- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet"& MaxChlA<10), aes(x=sumallPC1, y=MaxChlA)) + 
   geom_point() + geom_smooth(method="lm") + facet_wrap(~Depth, ncol=1, scale="free_x")  +
   theme_classic() + theme(strip.background = element_blank(), text=element_text(size=16)) +
   labs(x="PC1 (Length of summer)", y = "Max Chlorophyll A")
 
-# tiff("ChlA_panel_nooutlier.tiff", height=900, width=400)
-# ChlA_panel_nooutlier
-# dev.off()
+#  tiff("ChlA_panel_nooutlier.tiff", height=900, width=400)
+#  ChlA_panel_nooutlier
+#  dev.off()
 
 #here is with all the levels, graphs by value
 singlepanel_ChlA <- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA, color=Depth)) + 
