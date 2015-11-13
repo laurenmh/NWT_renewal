@@ -39,10 +39,12 @@ prodmean <- prodclim %>%
 #   geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp)) #+ facet_wrap(~class_3, scale="free")
 
 ## I think this is the best graph for differences in productivity versus summer length
+tiff("prod_climatePCA.tiff", width=400, height=1200)
 ggplot(prodmean, aes(x=sumallPC1, y=meananpp)) + geom_point() + facet_wrap(~class_3, scale="free", ncol=1)  + geom_smooth(method="lm") +
   geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp)) +
   theme_classic() + theme(strip.background = element_blank(), text=element_text(size=16)) +
   labs(x="PC1 (Length of summer)", y = expression(paste("Mean ANPP (g/m"^2, ")")))
+dev.off()
 
 l<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="DM"))
 summary(l)
