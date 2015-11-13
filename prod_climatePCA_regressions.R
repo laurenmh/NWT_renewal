@@ -46,6 +46,19 @@ ggplot(prodmean, aes(x=sumallPC1, y=meananpp)) + geom_point() + facet_wrap(~clas
   labs(x="PC1 (Length of summer)", y = expression(paste("Mean ANPP (g/m"^2, ")")))
 dev.off()
 
+tiff("prod_climatePCA_singlepanel.tiff", width=400, height=400)
+ggplot(prodmean, aes(x=sumallPC1, y=meananpp, color=class_3)) + geom_point(size=4)  + geom_smooth(method="lm", se=F, lwd=2) +
+  geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp)) +
+  theme_classic() + theme(strip.background = element_blank(), text=element_text(size=16)) +
+  labs(x="PC1 (Length of summer)", y = expression(paste("Mean ANPP (g/m"^2, ")")), color="Habitat")
+dev.off()
+
+prod_climatePCA_singlepanel <- ggplot(prodmean, aes(x=sumallPC1, y=meananpp, color=class_3)) + geom_point(size=4)  + geom_smooth(method="lm", se=F, lwd=2) +
+  geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp)) +
+  theme_classic() + theme(strip.background = element_blank(), text=element_text(size=16)) +
+  labs(x="PC1 (Length of summer)", y = expression(paste("Mean ANPP (g/m"^2, ")")), color="Habitat")
+
+
 l<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="DM"))
 summary(l)
 l<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="SB"))
