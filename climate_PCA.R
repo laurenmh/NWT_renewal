@@ -172,6 +172,13 @@ pcouts<-merge(allOutput, sumallyrsOutput, all=T)
 pcouts2<-merge(pcouts, sumOutput, all=T) %>%
   mutate(year=as.numeric(site))
 
+#creating one year lagged variables for all variables
+pclags<-pcouts2 %>%
+  select(year, sumallPC1, sumallPC2) %>%
+  mutate(year=year+1)
+names(pclags)[2:3]=c("sumallPC1_lag", "sumallPC2_lag")
+
+
 #write.csv(pcouts2, "climatePCA.csv")
 
 #Test that they are related - they are!
