@@ -4,6 +4,8 @@ library(dplyr)
 library(ggplot2)
 library(vegan)
 library(corrgram)
+library(grid)
+library(gridExtra)
 
 #### Relating prod to climate variables ####
 climate<-read.csv("~/Dropbox/NWT_data/NWT_ClimateData_2015-11-02.csv")
