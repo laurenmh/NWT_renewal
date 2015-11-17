@@ -164,3 +164,9 @@ sppdat0<- merge(aggdat3, sppkey) %>%
 
 sppdat <-merge(sppdat0, vegtype.key) %>%
   tbl_df()
+
+aggdat_key <- aggdat %>%
+  select(USDA_code, func) %>%
+  unique()
+
+sppdat2 <- merge(aggdat_key, sppdat)
