@@ -42,7 +42,7 @@ colnames(climatelags)[70:137]<-paste(vars,"_lag",sep = "")
 climateSummer <-climate %>%
   select(year, sum_meanT, sum_precip, sum_moisturedeficit, sum_PET, sum_GDD, 
          fivedayrunning5C, fivedayrunning12C, 
-         GSLthreedayneg3C) %>%
+         GSLthreedayneg3C, iceoff_GL4) %>%
         na.omit()
 row.names(climateSummer)<-climateSummer$year
 
