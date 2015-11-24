@@ -42,4 +42,51 @@ ridgelevel <-sppdat %>%
   tbl_df() %>%
   summarize(ridgetempmean=mean(abund), ridgetempvar=var(abund))
 
+## Double-check 
+sum(funclevel$functempmean)==ridgelevel$ridgetempmean
+sum(habitatlevel$habtempmean)==ridgelevel$ridgetempmean
 
+########## Portfolio effects
+ObsMean<-log(ridgelevel$ridgetempmean); ObsMean
+ObsVar<-log(ridgelevel$ridgetempvar); ObsVar
+
+### Within each habitat
+funclevel$logMean<-log(funclevel$functempmean)
+funclevel$logVar<-log(funclevel$functempvar)
+# FF
+FF<-funclevel[funclevel$class_3== "FF",]; FF
+m1<-lm(logVar~logMean,data=FF); summary(m1)
+plot(FF$logMean,FF$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m1)
+points(ObsMean,ObsVar,pch=16,col="black")
+BufFF<-predict(m1,data.frame(logMean=ObsMean))/ObsVar; BufFF
+# DM
+DM<-funclevel[funclevel$class_3== "DM",]; DM
+m2<-lm(logVar~logMean,data=DM); summary(m2)
+plot(DM$logMean,DM$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m2)
+points(ObsMean,ObsVar,pch=16,col="black")
+BufDM<-predict(m2,data.frame(logMean=ObsMean))/ObsVar; BufDM
+# MM
+MM<-funclevel[funclevel$class_3== "MM",]; MM
+m3<-lm(logVar~logMean,data=MM); summary(m3)
+plot(MM$logMean,MM$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m3)
+points(ObsMean,ObsVar,pch=16,col="black")
+BufMM<-predict(m3,data.frame(logMean=ObsMean))/ObsVar; BufMM
+# SB
+SB<-funclevel[funclevel$class_3== "SB",]; SB
+m4<-lm(logVar~logMean,data=SB); summary(m4)
+plot(SB$logMean,SB$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m4)
+points(ObsMean,ObsVar,pch=16,col="black")
+BufSB<-predict(m4,data.frame(logMean=ObsMean))/ObsVar; BufSB
+
+### Among habitats
+habitatlevel$logMean<-log(habitatlevel$habtempmean)
+habitatlevel$logVar<-log(habitatlevel$habtempvar)
+m5<-lm(logVar~logMean,data=habitatlevel); summary(m5)
+plot(habitatlevel$logMean,habitatlevel$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m5)
+points(ObsMean,ObsVar,pch=16,col="black")
+BufHAB<-predict(m5,data.frame(logMean=ObsMean))/ObsVar; BufHAB
+
+#### Lauren, it looks like there is some weak buffering among habitats
+#### but that synchrony among functional groups actually increases temporal variance
+#### Does this seem consistent with your corrgrams?
+#### Are there any other contrasts you'd like to try? 
