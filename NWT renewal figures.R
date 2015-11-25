@@ -41,9 +41,11 @@ SzYearMeans<-aggregate(df2$Gro,list(df2$SzYear),sum,na.rm=TRUE)$x
 SzCorMat<-cor(matrix(SzYearMeans,nrow=length(levels(df2$time)),ncol=length(levels(df2$SizeClass)),byrow=TRUE))
 colnames(SzCorMat)<-c("0-15","15-30","30-50","50-100",">100")
 rownames(SzCorMat)<-c("0-15","15-30","30-50","50-100",">100")
+pdf("Size classes within Silene population.pdf")
 corrplot(SzCorMat,method="circle",type="upper",tl.srt=45,tl.col="black",
          diag=FALSE,addCoef.col="gray20",mar=c(0,0,4,0),
          main=expression("Size classes within a"~italic(Silene)~"population"))
+dev.off()
 
 ### Among populations of Silene 
 df$PopYear<-interaction(df$Pop,df$time)
@@ -51,9 +53,11 @@ PYmeans<-aggregate(df$Gro,by=list(df$PopYear),sum,na.rm=TRUE)$x
 Mpop<-cor(matrix(PYmeans,nrow=11,ncol=4,byrow=TRUE))
 colnames(Mpop)<-c("P1","P2","P3","P4")
 rownames(Mpop)<-c("P1","P2","P3","P4")
+pdf("Among populations of Silene.pdf")
 corrplot(Mpop,method="circle",type="upper",tl.srt=45,tl.col="black",
          diag=FALSE,addCoef.col="gray20",mar=c(0,0,4,0),
          main=expression("Among"~italic(Silene)~"populations"))
+dev.off()
 
 # reset graphical parameters
 par(.pardefault)
@@ -88,18 +92,56 @@ par(.pardefault)
 # 6) variance in aggregate response through time
 
 #### Among individuals within a population (for total biomass)
+# SN1
 SzMean<-log(aggregate(df2$AreaT1,list(df2$Plt),mean,na.rm=TRUE)$x) # 2
 SzVar<-aggregate(df2$AreaT1,list(df2$Plt),var,na.rm=TRUE)$x # 3
 # method using variance-mean relationship to predict expected variance
 # fit linear regression of #2 and #3 on log-scale
 m1<-lm(log(SzVar)~SzMean); summary(m1)
-plot(SzMean,log(SzVar)); abline(m1)
-ObsMean<-log(mean(aggregate(df2$AreaT1,list(df2$time),sum,na.rm=TRUE)$x)) # 5
-ObsVar<-var(aggregate(df2$AreaT1,list(df2$time),sum,na.rm=TRUE)$x) # 6
+ObsMeana<-log(mean(aggregate(df2$AreaT1,list(df2$time),sum,na.rm=TRUE)$x)) # 5
+ObsVara<-var(aggregate(df2$AreaT1,list(df2$time),sum,na.rm=TRUE)$x) # 6
+plot(SzMean,log(SzVar),ylim=c(0,log(ObsVara)+1),xlim=c(0,ObsMeana+1)); abline(m1)
+points(ObsMeana,log(ObsVara),pch=16,col="black")
 # predict what aggregate variance should be based on regression
-Vpred<-predict(m1,data.frame(SzMean=ObsMean))
+Vpreda<-predict(m1,data.frame(SzMean=ObsMeana))
 # compare predicted and observed aggregate variances
-Buf1<-Vpred/log(ObsVar)
+Buf1<-Vpreda/log(ObsVara)
+
+# SN2
+df2b<-subset(df,df$Pop=="SN2")
+SzMeanb<-log(aggregate(df2b$AreaT1,list(df2b$Plt),mean,na.rm=TRUE)$x) 
+SzVarb<-aggregate(df2b$AreaT1,list(df2b$Plt),var,na.rm=TRUE)$x 
+m1b<-lm(log(SzVarb)~SzMeanb); summary(m1b)
+ObsMeanb<-log(mean(aggregate(df2b$AreaT1,list(df2b$time),sum,na.rm=TRUE)$x)) 
+ObsVarb<-var(aggregate(df2b$AreaT1,list(df2b$time),sum,na.rm=TRUE)$x) 
+plot(SzMeanb,log(SzVarb),ylim=c(0,log(ObsVarb)+1),xlim=c(0,ObsMeanb+1)); abline(m1b)
+points(ObsMeanb,log(ObsVarb),pch=16,col="black")
+Vpredb<-predict(m1b,data.frame(SzMeanb=ObsMeanb))
+Buf2<-Vpredb/log(ObsVarb)
+
+# SN3
+df2c<-subset(df,df$Pop=="SN3")
+SzMeanc<-log(aggregate(df2c$AreaT1,list(df2c$Plt),mean,na.rm=TRUE)$x) 
+SzVarc<-aggregate(df2c$AreaT1,list(df2c$Plt),var,na.rm=TRUE)$x 
+m1c<-lm(log(SzVarc)~SzMeanc); summary(m1c)
+ObsMeanc<-log(mean(aggregate(df2c$AreaT1,list(df2c$time),sum,na.rm=TRUE)$x)) 
+ObsVarc<-var(aggregate(df2c$AreaT1,list(df2c$time),sum,na.rm=TRUE)$x) 
+plot(SzMeanc,log(SzVarc),ylim=c(0,log(ObsVarc)+1),xlim=c(0,ObsMeanc+1)); abline(m1c)
+points(ObsMeanc,log(ObsVarc),pch=16,col="black")
+Vpredc<-predict(m1c,data.frame(SzMeanc=ObsMeanc))
+Buf3<-Vpredc/log(ObsVarc)
+
+# SN4
+df2d<-subset(df,df$Pop=="SN4")
+SzMeand<-log(aggregate(df2d$AreaT1,list(df2d$Plt),mean,na.rm=TRUE)$x) 
+SzVard<-aggregate(df2d$AreaT1,list(df2d$Plt),var,na.rm=TRUE)$x 
+m1d<-lm(log(SzVard)~SzMeand); summary(m1d)
+ObsMeand<-log(mean(aggregate(df2d$AreaT1,list(df2d$time),sum,na.rm=TRUE)$x)) 
+ObsVard<-var(aggregate(df2d$AreaT1,list(df2d$time),sum,na.rm=TRUE)$x) 
+plot(SzMeand,log(SzVard),ylim=c(0,log(ObsVard)+1),xlim=c(0,ObsMeand+1)); abline(m1d)
+points(ObsMeand,log(ObsVard),pch=16,col="black")
+Vpredd<-predict(m1d,data.frame(SzMeand=ObsMeand))
+Buf4<-Vpredd/log(ObsVard)
 
 
 # # method using ratio of CVs
@@ -121,9 +163,10 @@ SzMean2<-log(apply(Biomass2,2,mean,na.rm=TRUE)) #2
 SzVar2<-apply(Biomass2,2,var,na.rm=TRUE) #3
 # method using variance-mean relationship to predict expected variance
 m2<-lm(log(SzVar2)~SzMean2); summary(m2)
-plot(SzMean2,log(SzVar2)); abline(m2)
 ObsMean2<-log(mean(aggregate(df3$AreaT1,list(df3$time),sum,na.rm=TRUE)$x)) #5
 ObsVar2<-var(aggregate(df3$AreaT1,list(df3$time),sum,na.rm=TRUE)$x) #6
+plot(SzMean2,log(SzVar2),ylim=c(0,log(ObsVar2)+1),xlim=c(0,ObsMean2+1)); abline(m2)
+points(ObsMean2,log(ObsVar2),pch=16,col="black")
 Vpred2<-predict(m2,data.frame(SzMean2=ObsMean2))
 Buf1b<-Vpred2/log(ObsVar2)
 
@@ -136,12 +179,61 @@ Buf1b<-Vpred2/log(ObsVar2)
 # Vi2<-Vind(varX=SzVar2,sensX=rep(1,length(SzVar2)))
 # Buf3b<-((ObsVar2-Vi2)/(Vp2-Vi2))
 
-#### Figure to illustrate magnitude of buffering at different scale
+#### Figure to illustrate magnitude of buffering at different scales
+## Note: must run MeanVar_CoverData.R to get buffering at community and landscape scales
 par(.pardefault)
-y<-c(Buf1,Buf1b) # Lauren, you can add in your buffering estimates here
+y<-c(Buf1,Buf2,Buf3,Buf4,Buf1b,BufFF,BufDM,BufMM,BufSB,BufHAB) 
+x<-c(exp(Vpreda)/ObsVara,exp(Vpredb)/ObsVarb, exp(Vpredc)/ObsVarc,exp(Vpredd)/ObsVard,exp(Vpred2)/ObsVar2, 
+     expBufFF,expBufDM,expBufMM,expBufSB,expBufHAB)
+labs<-c("P1","P2","P3","P4",expression(italic(Silene)), "Fellfield","Dry meadow","Moist meadow","Snowbed","Landscape")
 # values greater than one indicate buffering
 # values less than one indicate more variance than expected (strong positive correlations)
-barplot(y,
-        names=c("Individuals","Transects"),
-        ylim=c(0,2))
+
+# buffering on a log scale
+pdf("Portfolio effects on log scale.pdf")
+par(oma=c(3,1,1,1))
+b1<-barplot(y,names="",ylab="log predicted variance / log observed variance",
+        col=c(rep("gray80",4),"gray20",rep("white",4),"gray60")
+        ,ylim=c(0,2))
+b2<-barplot(y,names="",
+            col=c(rep("black",4),"gray20",rep("black",4),"gray60"),
+            density=c(rep(10,4),-3,rep(10,4),-3),add=TRUE)
 abline(h=1)
+text(b1-.5,par("usr")[1]+.05,labels=labs,srt=60,pos=1,xpd=TRUE)
+legend("topright",legend=c("Among individuals within a population", 
+                           expression("Among transects of"~italic(Silene)),
+                           "Among functional groups within a habitat",
+                           "Among habitats across the landscape"),
+       fill=c("gray80","gray20","white","gray60"),border="black",
+       density=-3,bty="n",pt.cex=2)
+legend("topright",legend=c("Among individuals within a population", 
+                           expression("Among transects of"~italic(Silene)),
+                           "Among functional groups within a habitat",
+                           "Among habitats across the landscape"),
+       fill=c("black","gray20","black","gray60"),border="black",
+       density=c(20,-3,20,-3),bty="n",pt.cex=2)
+dev.off()
+### buffering on the raw scale
+pdf("Portfolio effects on raw scale.pdf")
+par(oma=c(3,1,1,1))
+b3<-barplot(x,names="", ylab="Predicted variance / Observed variance",
+            col=c(rep("gray80",4),"gray20",rep("white",4),"gray60")
+            ,ylim=c(0,10))
+b4<-barplot(x,names="",
+            col=c(rep("black",4),"gray20",rep("black",4),"gray60"),
+            density=c(rep(10,4),-3,rep(10,4),-3),add=TRUE)
+abline(h=1)
+text(b1-.5,par("usr")[1]-1,labels=labs,srt=60,pos=1,xpd=TRUE)
+legend("topright",legend=c("Among individuals within a population", 
+                           expression("Among transects of"~italic(Silene)),
+                           "Among functional groups within a habitat",
+                           "Among habitats across the landscape"),
+       fill=c("gray80","gray20","white","gray60"),border="black",
+       density=-3,bty="n",pt.cex=2)
+legend("topright",legend=c("Among individuals within a population", 
+                           expression("Among transects of"~italic(Silene)),
+                           "Among functional groups within a habitat",
+                           "Among habitats across the landscape"),
+       fill=c("black","gray20","black","gray60"),border="black",
+       density=c(20,-3,20,-3),bty="n",pt.cex=2)
+dev.off()
