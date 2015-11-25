@@ -59,24 +59,28 @@ m1<-lm(logVar~logMean,data=FF); summary(m1)
 plot(FF$logMean,FF$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m1)
 points(ObsMean,ObsVar,pch=16,col="black")
 BufFF<-predict(m1,data.frame(logMean=ObsMean))/ObsVar; BufFF
+expBufFF<-exp(predict(m1,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufFF
 # DM
 DM<-funclevel[funclevel$class_3== "DM",]; DM
 m2<-lm(logVar~logMean,data=DM); summary(m2)
 plot(DM$logMean,DM$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m2)
 points(ObsMean,ObsVar,pch=16,col="black")
 BufDM<-predict(m2,data.frame(logMean=ObsMean))/ObsVar; BufDM
+expBufDM<-exp(predict(m2,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufDM
 # MM
 MM<-funclevel[funclevel$class_3== "MM",]; MM
 m3<-lm(logVar~logMean,data=MM); summary(m3)
 plot(MM$logMean,MM$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m3)
 points(ObsMean,ObsVar,pch=16,col="black")
 BufMM<-predict(m3,data.frame(logMean=ObsMean))/ObsVar; BufMM
+expBufMM<-exp(predict(m3,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufMM
 # SB
 SB<-funclevel[funclevel$class_3== "SB",]; SB
 m4<-lm(logVar~logMean,data=SB); summary(m4)
 plot(SB$logMean,SB$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m4)
 points(ObsMean,ObsVar,pch=16,col="black")
 BufSB<-predict(m4,data.frame(logMean=ObsMean))/ObsVar; BufSB
+expBufSB<-exp(predict(m4,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufSB
 
 ### Among habitats
 habitatlevel$logMean<-log(habitatlevel$habtempmean)
@@ -85,6 +89,7 @@ m5<-lm(logVar~logMean,data=habitatlevel); summary(m5)
 plot(habitatlevel$logMean,habitatlevel$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m5)
 points(ObsMean,ObsVar,pch=16,col="black")
 BufHAB<-predict(m5,data.frame(logMean=ObsMean))/ObsVar; BufHAB
+expBufHAB<-exp(predict(m5,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufHAB
 
 #### Lauren, it looks like there is some weak buffering among habitats
 #### but that synchrony among functional groups actually increases temporal variance
