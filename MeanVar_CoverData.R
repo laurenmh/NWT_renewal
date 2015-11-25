@@ -91,6 +91,21 @@ points(ObsMean,ObsVar,pch=16,col="black")
 BufHAB<-predict(m5,data.frame(logMean=ObsMean))/ObsVar; BufHAB
 expBufHAB<-exp(predict(m5,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufHAB
 
+### Mean-SD figure for renewal
+SD<-sqrt(habitatlevel$habtempvar)
+MeanVec<-seq(0,10000)
+pdf("SD-Mean curve for plant cover across the landscape.pdf")
+plot(habitatlevel$habtempmean,SD,xlim=c(0,10000),ylim=c(0,1600),
+     ylab="SD plant cover",xlab="Mean plant cover")
+points(ridgelevel$ridgetempmean,sqrt(ridgelevel$ridgetempvar),pch=16,col="black")
+points(ridgelevel$ridgetempmean,sqrt(exp(predict(m5,data.frame(logMean=ObsMean)))))
+lines(MeanVec,sqrt(exp(predict(m5,data.frame(logMean=log(MeanVec))))))
+exp(ObsVar)/exp(predict(m5,data.frame(logMean=ObsMean)))
+text(x=8000,y=800,"Observed variance = ")
+text(x=8000,y=700,"42.87% of ")
+text(x=8000,y=600,"predicted variance")
+dev.off()
+
 #### Lauren, it looks like there is some weak buffering among habitats
 #### but that synchrony among functional groups actually increases temporal variance
 #### Does this seem consistent with your corrgrams?
