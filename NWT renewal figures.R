@@ -15,7 +15,10 @@ require(raster)
 # create growth vector on absolute scale
 df$Gro<-df$AreaT1-df$AreaT0
 
-########### Create correlation plots for annual growth rate of Silene
+df<-subset(df,!df$Trans%in%c("2A","2C"))
+# remove transects 2A and 2C b/c missing data in 2005 and 2006
+
+########### Create correlation plots for annual growth of Silene
 
 ### Among size classes of Silene within population SN1
 # Assign individuals to size classes
@@ -24,8 +27,8 @@ hist(MeanSize$x,breaks=50)
 MeanGrowth<-aggregate(df$AreaGro,list(df$PltID),mean,na.rm=TRUE)
 plot(MeanSize$x,MeanGrowth$x)
 quantile(MeanSize$x)
-# assign sign classes 0-15, 15-30, 30-50, 50-100, >100
-SizeClass<-cut(MeanSize$x,breaks=c(0,15,30,50,100,200,1000),labels=FALSE)
+# assign sign classes 0-20, 20-50, 50-100, >100
+SizeClass<-cut(MeanSize$x,breaks=c(0,20,50,100,1000),labels=FALSE)
 boxplot(MeanSize$x~SizeClass)
 df$SizeClass<-0
 for (i in 1:length(levels(df$PltID))){  
@@ -33,14 +36,15 @@ for (i in 1:length(levels(df$PltID))){
 }
 df$SizeClass<-as.factor(df$SizeClass)
 
-# Create correlation matrix for population SN1
-df2<-subset(df,df$Pop=="SN1")
+# Create correlation matrix for population SN4
+df2<-subset(df,df$Pop=="SN4")
 df2<-droplevels(df2)
 df2$SzYear<-interaction(df2$SizeClass,df2$time)
-SzYearMeans<-aggregate(df2$Gro,list(df2$SzYear),sum,na.rm=TRUE)$x
+table(df2$SizeClass,df2$time)
+SzYearMeans<-aggregate(df2$AreaT1,list(df2$SzYear),sum,na.rm=TRUE)$x
 SzCorMat<-cor(matrix(SzYearMeans,nrow=length(levels(df2$time)),ncol=length(levels(df2$SizeClass)),byrow=TRUE))
-colnames(SzCorMat)<-c("0-15","15-30","30-50","50-100",">100")
-rownames(SzCorMat)<-c("0-15","15-30","30-50","50-100",">100")
+colnames(SzCorMat)<-c("0-20","20-50","50-100",">100")
+rownames(SzCorMat)<-c("0-20","20-50","50-100",">100")
 pdf("Size classes within Silene population.pdf")
 corrplot(SzCorMat,method="circle",type="upper",tl.srt=45,tl.col="black",
          diag=FALSE,addCoef.col="gray20",mar=c(0,0,4,0),
@@ -58,6 +62,22 @@ corrplot(Mpop,method="circle",type="upper",tl.srt=45,tl.col="black",
          diag=FALSE,addCoef.col="gray20",mar=c(0,0,4,0),
          main=expression("Among"~italic(Silene)~"populations"))
 dev.off()
+
+### Among transects of Silene 
+df$TransYear<-interaction(df$Trans,df$time)
+table(df$Trans,df$time)
+df3<-subset(df,!df$Trans%in%c("2A","2C"))
+# remove transects 2A and 2C b/c missing data in 2005 and 2006
+Tmeans<-aggregate(df3$Gro,by=list(df3$TransYear),sum,na.rm=TRUE)$x
+Mtran<-cor(matrix(Tmeans,nrow=11,ncol=12,byrow=TRUE))
+colnames(Mtran)<-paste(rep(c("P1","P2","P3","P4"),c(3,1,3,5)),c("a","b","c","c","a","b","c","a","b","c","d","e"),sep="")
+rownames(Mtran)<-paste(rep(c("P1","P2","P3","P4"),c(3,1,3,5)),c("a","b","c","c","a","b","c","a","b","c","d","e"),sep="")
+pdf("Among transects of Silene.pdf")
+corrplot(Mtran,method="circle",type="upper",tl.srt=45,tl.col="black",
+         diag=FALSE,addCoef.col="gray20",mar=c(0,0,4,0),
+         main=expression("Among"~italic(Silene)~"transects"),xpd=TRUE)
+dev.off()
+
 
 # reset graphical parameters
 par(.pardefault)
@@ -154,10 +174,6 @@ Buf4<-Vpredd/log(ObsVard)
 # Buf3<-((ObsVar-Vi)/(Vp-Vi))
 
 #### Among transects (for total biomass)
-df$TransYear<-interaction(df$Trans,df$time)
-table(df$Trans,df$time)
-df3<-subset(df,!df$Trans%in%c("2A","2C"))
-# remove transects 2A and 2C b/c missing data in 2005 and 2006
 Biomass2<-matrix(aggregate(df3$AreaT1,list(df3$TransYear),sum,na.rm=TRUE)$x,nrow=11,ncol=12,byrow=TRUE) #1
 SzMean2<-log(apply(Biomass2,2,mean,na.rm=TRUE)) #2
 SzVar2<-apply(Biomass2,2,var,na.rm=TRUE) #3
@@ -191,7 +207,7 @@ labs<-c("P1","P2","P3","P4",expression(italic(Silene)), "Fellfield","Dry meadow"
 
 # buffering on a log scale
 pdf("Portfolio effects on log scale.pdf")
-par(oma=c(3,1,1,1))
+par(oma=c(4,1,1,1))
 b1<-barplot(y,names="",ylab="log predicted variance / log observed variance",
         col=c(rep("gray80",4),"gray20",rep("white",4),"gray60")
         ,ylim=c(0,2))
@@ -199,7 +215,7 @@ b2<-barplot(y,names="",
             col=c(rep("black",4),"gray20",rep("black",4),"gray60"),
             density=c(rep(10,4),-3,rep(10,4),-3),add=TRUE)
 abline(h=1)
-text(b1-.5,par("usr")[1]+.05,labels=labs,srt=60,pos=1,xpd=TRUE)
+text(b1-.5,par("usr")[1]+.07,labels=labs,srt=60,pos=1,xpd=TRUE)
 legend("topright",legend=c("Among individuals within a population", 
                            expression("Among transects of"~italic(Silene)),
                            "Among functional groups within a habitat",
@@ -215,7 +231,7 @@ legend("topright",legend=c("Among individuals within a population",
 dev.off()
 ### buffering on the raw scale
 pdf("Portfolio effects on raw scale.pdf")
-par(oma=c(3,1,1,1))
+par(oma=c(4,1,1,1))
 b3<-barplot(x,names="", ylab="Predicted variance / Observed variance",
             col=c(rep("gray80",4),"gray20",rep("white",4),"gray60")
             ,ylim=c(0,10))
@@ -223,7 +239,7 @@ b4<-barplot(x,names="",
             col=c(rep("black",4),"gray20",rep("black",4),"gray60"),
             density=c(rep(10,4),-3,rep(10,4),-3),add=TRUE)
 abline(h=1)
-text(b1-.5,par("usr")[1]-1,labels=labs,srt=60,pos=1,xpd=TRUE)
+text(b1-.5,par("usr")[1]-0.7,labels=labs,srt=60,pos=1,xpd=TRUE)
 legend("topright",legend=c("Among individuals within a population", 
                            expression("Among transects of"~italic(Silene)),
                            "Among functional groups within a habitat",
