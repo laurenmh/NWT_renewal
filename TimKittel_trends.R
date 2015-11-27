@@ -151,36 +151,43 @@ a <- YRLY.PPT + geom_line() + geom_point(aes(shape=Site), size=3) +
   geom_smooth(colour="black", linetype=2,data=subset(Yearly_PPT, Site=="C1" & Year>1977), method = lm, se=FALSE, lwd=1) +
   geom_vline(x=1977, colour="black", linetype=4) +
   theme_classic(base_size = 14) +
-  geom_text(aes(2005, 1500, label = "D1 - High Alpine"), size=4, colour="black") +
-  geom_text(aes(2005, 400, label = "C1 - Subalpine"), size=4, colour="black") +
-  geom_text(aes(1978, 420, label = "1976/77 PDO \n Regime Shift"), size=4, colour="black", hjust=0, family="Times") +
-  theme(legend.position="none", axis.title.x = element_blank())
+  geom_text(aes(2005, 1500, label = "D1 - High Alpine"), size=5, colour="black") +
+  geom_text(aes(2005, 400, label = "C1 - Subalpine"), size=5, colour="black") +
+  geom_text(aes(1978, 420, label = "1976/77 PDO \n Regime Shift"), colour="black", hjust=0, family="Courier") +
+  theme(legend.position="none", axis.title.x = element_blank(),
+        axis.text = element_text(size = 16),
+        axis.title.y = element_text(vjust=0.5, size=18))
 
 
 #Mean monthly total precip#
 MNLY.PPT <- ggplot(MonthlyPPT, aes(Month, Trend, color=Site))
 b <- MNLY.PPT + geom_line(aes(group=Site)) + geom_point(aes(shape=Site), size=3) +
   geom_hline(yintercept=0) +
-  ylab(expression(paste("Precipitation Trend (mm month"^-1, yr^-1,")"))) + theme_classic(base_size = 14) +
-  geom_text(aes(11, 0.7, label = "D1 - High Alpine"), size=4, colour="black") +
-  geom_text(aes(11, -0.3, label = "C1 - Subalpine"), size=4, colour="black") +
+  ylab(expression(paste("Precipitation Trend (mm mo"^-1, yr^-1,")"))) + theme_classic(base_size = 14) +
+  geom_text(aes(11, 0.7, label = "D1 - High Alpine"), size=5, colour="black") +
+  geom_text(aes(11, -0.3, label = "C1 - Subalpine"), size=5, colour="black") +
   geom_text(aes(2, 0.708, label= "*"), colour="black") +
   geom_text(aes(4, 1.231, label= "**"), colour="black") +
   geom_text(aes(10, 1.314, label= "***"), colour="black") +
   geom_text(aes(11, 0.873, label= "*"), colour="black") +
   geom_text(aes(12, 1.163, label= "**"), colour="black") +            
-  theme(legend.position="none", axis.title.x = element_blank())
+  theme(legend.position="none", axis.title.x = element_blank(),
+        axis.text = element_text(size = 16),
+        axis.title.y = element_text(vjust=0.5, size=18))
 
 #Temperature - Diurnal only
 YRLY.DIURNAL <- ggplot(Yearly_Diurnal, aes(Year, DiurnalMean, color=Site))
 c <- YRLY.DIURNAL + geom_line() + geom_point(aes(shape=Site), size=3) + 
-  ylab(expression(paste("Diurnal Temperature Range Trend ("*degree*C,")"))) + 
+  ylab(expression(paste("Diurnal Temp. Range Trend ("*degree*C,")"))) + 
   geom_smooth(colour="black", data=subset(Yearly_Diurnal, Site=="D1"), method = lm, se=FALSE, lwd=1) +
   geom_smooth(colour="black", data=subset(Yearly_Diurnal, Site=="C1"), method = lm, se=FALSE, lwd=1) +
   theme_classic(base_size = 14) +
-  geom_text(aes(2000, 8.5, label = "D1 - High Alpine"), size=4, colour="black") +
-  geom_text(aes(2000, 11.5, label = "C1 - Subalpine"), size=4, colour="black") +
-  theme(legend.position="none")
+  geom_text(aes(2000, 8.5, label = "D1 - High Alpine"), size=5, colour="black") +
+  geom_text(aes(2000, 11.5, label = "C1 - Subalpine"), size=5, colour="black") +
+  theme(legend.position="none",
+        axis.text = element_text(size = 16),
+        axis.title.x = element_text(vjust=-0.5, size =18),
+        axis.title.y = element_text(vjust=0.5, size=18))
 
 
 #NOT USING ANY TEMP GRAPHS BELOW HERE#
@@ -217,9 +224,9 @@ c <- YRLY.DIURNAL + geom_line() + geom_point(aes(shape=Site), size=3) +
 #Monthly temp trends over time#
 MNLY.Temp <- ggplot(MonthlyDiurnal, aes(Month, Trend, color=Site))
 d <- MNLY.Temp + geom_line(aes(group=Site)) + geom_point(aes(shape=Site), size=3) + 
-  ylab(expression(paste("Diurnal Temperature Range Trend ("*degree*C," ", yr^-1,")"))) + theme_classic(base_size = 14) + 
-  geom_text(aes(10, 0.02, label = "D1 - High Alpine"), size=4, colour="black", hjust=0) +
-  geom_text(aes(10, 0.055, label = "C1 - Subalpine"), size=4, colour="black", hjust=0) +
+  ylab(expression(paste("Diurnal Temp. Range Trend ("*degree*C," ", yr^-1,")"))) + theme_classic(base_size = 14) + 
+  geom_text(aes(10, 0.02, label = "D1 - High Alpine"), size=5, colour="black", hjust=0) +
+  geom_text(aes(10, 0.055, label = "C1 - Subalpine"), size=5, colour="black", hjust=0) +
   geom_text(aes(1, 0.045, label= "***"), colour="black") +
   geom_text(aes(2, 0.056, label= "***"), colour="black") +
   geom_text(aes(3, 0.057, label= "***"), colour="black") +
@@ -237,7 +244,10 @@ d <- MNLY.Temp + geom_line(aes(group=Site)) + geom_point(aes(shape=Site), size=3
   geom_text(aes(7, 0.015, label= "**"), colour="black") +
   geom_text(aes(8, 0.012, label= "*"), colour="black") +
   geom_text(aes(9, 0.02, label= "**"), colour="black") +
-  theme(legend.position="none")
+  theme(legend.position="none",
+        axis.text = element_text(size = 16),
+        axis.title.x = element_text(vjust=-0.5, size =18),
+        axis.title.y = element_text(vjust=0.5, size=18))
 
 #Not using these (for now)
 #MNLY.MeanT <- ggplot(Monthly_Temp, aes(Month, `mean(Tmean)`, group=Site))
