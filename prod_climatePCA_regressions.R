@@ -53,16 +53,43 @@ ggplot(prodmean, aes(x=sumallPC1, y=meananpp, color=class_3)) + geom_point(size=
   labs(x="PC1 (Length of summer)", y = expression(paste("Mean ANPP (g/m"^2, ")")), color="Habitat")
 dev.off()
 
+
 prod_climatePCA_singlepanel <- ggplot(prodmean, aes(x=sumallPC1, y=meananpp, color=class_3)) + geom_point(size=4)  + geom_smooth(method="lm", se=F, lwd=2) +
   geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp)) +
   theme_classic() + theme(strip.background = element_blank(), text=element_text(size=16)) +
   labs(x="PC1 (Length of summer)", y = expression(paste("Mean ANPP (g/m"^2, ")")), color="Habitat")
 
+#Caitlin's check for trendline significance
+dm.lm<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="DM"))
+summary(dm.lm) #signif at p<0.1
+sb.lm<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="SB"))
+summary(sb.lm) #signif at p<0.1
+ff.lm<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="FF"))
+summary(ff.lm) #not signif
+mm.lm<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="MM"))
+summary(mm.lm) #not signif
 
-l<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="DM"))
-summary(l)
-l<-lm(meananpp~sumallPC1, subset(prodmean, class_3=="SB"))
-summary(l)
+#Caitlin uses this gradph for proposal draft 1 figure
+FinalANPP <- ggplot(prodmean, aes(x=sumallPC1, y=meananpp, color=class_3)) +
+    geom_point(aes(shape=class_3), size=4) + 
+    ylab(expression(paste("Mean ANPP (g ",m^-2, ")"))) + 
+    geom_smooth(data=subset(prodmean, class_3=="DM"), method="lm", se=F, lwd=1) +
+    geom_smooth(data=subset(prodmean, class_3=="SB"), method="lm", se=F, lwd=1) + 
+    geom_smooth(data=subset(prodmean, class_3=="FF"), method="lm", se=F, linetype=2, lwd=1) +
+    geom_smooth(data=subset(prodmean, class_3=="MM"), method="lm", se=F, linetype=2, lwd=1) +
+    theme_classic() + 
+    theme(text=element_text(size=16),
+          axis.text.x=element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_text(vjust=1, size=18)) +
+    scale_colour_discrete(name="Habitat") +
+    scale_shape_discrete(name="Habitat")
+                          #breaks=c("DM", "FF", "MM", "SB"),
+                          #labels=c("Dry meadow", "Fellfield", "Moist meadow", "Snowbed"))
+
+tiff("FinalANPP.tiff", width=400, height=400)
+FinalANPP
+dev.off()
 
 ##Graph by PC2 as well
 #remember here that the larger PC2 values are drier years

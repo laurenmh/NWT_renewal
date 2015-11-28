@@ -75,14 +75,32 @@ summary(l)
 #  dev.off()
 
 #here is with all the levels, graphs by value
-singlepanel_ChlA <- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA, color=Depth)) + 
-  geom_point(size=4) + geom_smooth(method="lm", se=F, lwd=2) + 
-  theme_classic() + theme(strip.background = element_blank(), text=element_text(size=16)) +
-  labs(x="PC1 (Length of summer)", y = "Max Chlorophyll A")
+##check for significance in lm trendline by depth
+MaxChla.0<-lm(MaxChlA~sumallPC1, subset(GL4_clim, Depth==0 & MaxChlA<10))
+summary(MaxChla.0) #not signif
+MaxChla.3<-lm(MaxChlA~sumallPC1, subset(GL4_clim, Depth==3 & MaxChlA<10))
+summary(MaxChla.3) #not signif
+MaxChla.9<-lm(MaxChlA~sumallPC1, subset(GL4_clim, Depth==9 & MaxChlA<10))
+summary(MaxChla.9) #signif at p<0.05
 
-# tiff("singlepanel_ChlA.tiff", height=400, width=400)
-# singlepanel_ChlA
-# dev.off()
+#Caitlin uses this graph for draft 1 of renewal figure  
+singlepanel_ChlA <- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA, color=Depth)) + 
+    geom_point(aes(shape=Depth), size=4) + 
+    geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=2, lwd=1) + 
+    geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=2, lwd=1) +
+    geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=1) +
+    xlab("PC1 (Length of summer)") +
+    ylab(expression(paste("Max Chlorophyll ", italic("a")," (",mu,"g ", L^-1,")"))) +
+    theme_classic() + 
+    theme(text=element_text(size=16),
+          axis.text.x=element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_text(vjust=1, size=18))
+    
+
+tiff("singlepanel_ChlA.tiff", height=400, width=400)
+singlepanel_ChlA
+dev.off()
 
 #and with all levels, graphed by value, then with fit across depths
 singlepanel_ChlA_2<- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA)) + 
