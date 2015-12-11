@@ -198,10 +198,16 @@ Buf1b<-Vpred2/log(ObsVar2)
 #### Figure to illustrate magnitude of buffering at different scales
 ## Note: must run MeanVar_CoverData.R to get buffering at community and landscape scales
 par(.pardefault)
-y<-c(Buf1,Buf2,Buf3,Buf4,Buf1b,BufFF,BufDM,BufMM,BufSB,BufHAB) 
-x<-c(exp(Vpreda)/ObsVara,exp(Vpredb)/ObsVarb, exp(Vpredc)/ObsVarc,exp(Vpredd)/ObsVard,exp(Vpred2)/ObsVar2, 
-     expBufFF,expBufDM,expBufMM,expBufSB,expBufHAB)
+lobsvar<-c(log(ObsVara),log(ObsVarb),log(ObsVarc),log(ObsVard),log(ObsVar2),ObsVarFF,ObsVarDM,ObsVarMM,ObsVarSB,ObsVar)
+lpredvar<-c(Vpreda,Vpredb,Vpredc,Vpredd,Vpred2,PredVarFF,PredVarDM,PredVarMM,PredVarSB,PredVar)  
+y<-lpredvar/lobsvar 
+x<-exp(lpredvar)/exp(lobsvar)
+z<-sqrt(exp(lpredvar))/sqrt(exp(lobsvar))
 labs<-c("P1","P2","P3","P4",expression(italic(Silene)), "Fellfield","Dry meadow","Moist meadow","Snowbed","Landscape")
+PE<-cbind(as.character(labs),x,y,z,lobsvar,lpredvar); PE[5,1]<-"Silene"
+colnames(PE)<-c("Level","log variance ratio","variance ratio","sd ratio","observed log variance","predicted log variance")
+write.csv(PE,"NWT_portfolio effects estimates.csv")
+
 # values greater than one indicate buffering
 # values less than one indicate more variance than expected (strong positive correlations)
 
@@ -240,6 +246,31 @@ b4<-barplot(x,names="",
             density=c(rep(10,4),-3,rep(10,4),-3),add=TRUE)
 abline(h=1)
 text(b1-.5,par("usr")[1]-0.7,labels=labs,srt=60,pos=1,xpd=TRUE)
+legend("topright",legend=c("Among individuals within a population", 
+                           expression("Among transects of"~italic(Silene)),
+                           "Among functional groups within a habitat",
+                           "Among habitats across the landscape"),
+       fill=c("gray80","gray20","white","gray60"),border="black",
+       density=-3,bty="n",pt.cex=2)
+legend("topright",legend=c("Among individuals within a population", 
+                           expression("Among transects of"~italic(Silene)),
+                           "Among functional groups within a habitat",
+                           "Among habitats across the landscape"),
+       fill=c("black","gray20","black","gray60"),border="black",
+       density=c(20,-3,20,-3),bty="n",pt.cex=2)
+dev.off()
+
+### buffering on the sd scale
+pdf("Portfolio effects on sd scale.pdf")
+par(oma=c(4,1,1,1))
+b1<-barplot(z,names="",ylab="predicted sd / observed sd",
+            col=c(rep("gray80",4),"gray20",rep("white",4),"gray60")
+            ,ylim=c(0,4))
+b2<-barplot(z,names="",
+            col=c(rep("black",4),"gray20",rep("black",4),"gray60"),
+            density=c(rep(10,4),-3,rep(10,4),-3),add=TRUE)
+abline(h=1)
+text(b1-.5,par("usr")[1]-.1,labels=labs,srt=60,pos=1,xpd=TRUE)
 legend("topright",legend=c("Among individuals within a population", 
                            expression("Among transects of"~italic(Silene)),
                            "Among functional groups within a habitat",
