@@ -56,31 +56,43 @@ funclevel$logVar<-log(funclevel$functempvar)
 # FF
 FF<-funclevel[funclevel$class_3== "FF",]; FF
 m1<-lm(logVar~logMean,data=FF); summary(m1)
-plot(FF$logMean,FF$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m1)
-points(ObsMean,ObsVar,pch=16,col="black")
-BufFF<-predict(m1,data.frame(logMean=ObsMean))/ObsVar; BufFF
-expBufFF<-exp(predict(m1,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufFF
+ObsMeanFF<-habitatlevel$logMean[habitatlevel$class_3=="FF"]
+ObsVarFF<-habitatlevel$logVar[habitatlevel$class_3=="FF"]
+plot(FF$logMean,FF$logVar,xlim=c(0,ObsMeanFF+1),ylim=c(0,ObsVarFF+1)); abline(m1)
+points(ObsMeanFF,ObsVarFF,pch=16,col="black")
+PredVarFF<-predict(m1,data.frame(logMean=ObsMeanFF))
+BufFF<-PredVarFF/ObsVarFF; BufFF
+expBufFF<-exp(PredVarFF)/exp(ObsVarFF); expBufFF
 # DM
 DM<-funclevel[funclevel$class_3== "DM",]; DM
 m2<-lm(logVar~logMean,data=DM); summary(m2)
-plot(DM$logMean,DM$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m2)
-points(ObsMean,ObsVar,pch=16,col="black")
-BufDM<-predict(m2,data.frame(logMean=ObsMean))/ObsVar; BufDM
-expBufDM<-exp(predict(m2,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufDM
+ObsMeanDM<-habitatlevel$logMean[habitatlevel$class_3=="DM"]
+ObsVarDM<-habitatlevel$logVar[habitatlevel$class_3=="DM"]
+plot(DM$logMean,DM$logVar,xlim=c(0,ObsMeanDM+1),ylim=c(0,ObsVarDM+1)); abline(m2)
+points(ObsMeanDM,ObsVarDM,pch=16,col="black")
+PredVarDM<-predict(m2,data.frame(logMean=ObsMeanDM))
+BufDM<-PredVarDM/ObsVarDM; BufDM
+expBufDM<-exp(PredVarDM)/exp(ObsVarDM); expBufDM
 # MM
 MM<-funclevel[funclevel$class_3== "MM",]; MM
 m3<-lm(logVar~logMean,data=MM); summary(m3)
-plot(MM$logMean,MM$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m3)
-points(ObsMean,ObsVar,pch=16,col="black")
-BufMM<-predict(m3,data.frame(logMean=ObsMean))/ObsVar; BufMM
-expBufMM<-exp(predict(m3,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufMM
+ObsMeanMM<-habitatlevel$logMean[habitatlevel$class_3=="MM"]
+ObsVarMM<-habitatlevel$logVar[habitatlevel$class_3=="MM"]
+plot(MM$logMean,MM$logVar,xlim=c(0,ObsMeanMM+1),ylim=c(0,ObsVarMM+1)); abline(m3)
+points(ObsMeanMM,ObsVarMM,pch=16,col="black")
+PredVarMM<-predict(m3,data.frame(logMean=ObsMeanMM))
+BufMM<-PredVarMM/ObsVarMM; BufMM
+expBufMM<-exp(PredVarMM)/exp(ObsVarMM); expBufMM
 # SB
 SB<-funclevel[funclevel$class_3== "SB",]; SB
 m4<-lm(logVar~logMean,data=SB); summary(m4)
-plot(SB$logMean,SB$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m4)
-points(ObsMean,ObsVar,pch=16,col="black")
-BufSB<-predict(m4,data.frame(logMean=ObsMean))/ObsVar; BufSB
-expBufSB<-exp(predict(m4,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufSB
+ObsMeanSB<-habitatlevel$logMean[habitatlevel$class_3=="SB"]
+ObsVarSB<-habitatlevel$logVar[habitatlevel$class_3=="SB"]
+plot(SB$logMean,SB$logVar,xlim=c(0,ObsMeanSB+1),ylim=c(0,ObsVarSB+1)); abline(m4)
+points(ObsMeanSB,ObsVarSB,pch=16,col="black")
+PredVarSB<-predict(m4,data.frame(logMean=ObsMeanSB))
+BufSB<-PredVarSB/ObsVarSB; BufSB
+expBufSB<-exp(PredVarSB)/exp(ObsVarSB); expBufSB
 
 ### Among habitats
 habitatlevel$logMean<-log(habitatlevel$habtempmean)
@@ -88,8 +100,9 @@ habitatlevel$logVar<-log(habitatlevel$habtempvar)
 m5<-lm(logVar~logMean,data=habitatlevel); summary(m5)
 plot(habitatlevel$logMean,habitatlevel$logVar,xlim=c(0,ObsMean+1),ylim=c(0,ObsVar+1)); abline(m5)
 points(ObsMean,ObsVar,pch=16,col="black")
-BufHAB<-predict(m5,data.frame(logMean=ObsMean))/ObsVar; BufHAB
-expBufHAB<-exp(predict(m5,data.frame(logMean=ObsMean)))/exp(ObsVar); expBufHAB
+PredVar<-predict(m5,data.frame(logMean=ObsMean))
+BufHAB<-PredVar/ObsVar; BufHAB
+expBufHAB<-exp(PredVar)/exp(ObsVar); expBufHAB
 
 ### Mean-SD figure for renewal
 SD<-sqrt(habitatlevel$habtempvar)
