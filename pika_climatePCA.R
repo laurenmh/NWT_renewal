@@ -131,17 +131,20 @@ Juvenile.lm <-lm(meanWeight~sumallPC1, data=subset(FinalPika, Stage=="Juvenile")
 summary(Juvenile.lm) #signif at p<0.05
     
 PikaWgtvsumallPC1<- ggplot(FinalPika, aes(x=sumallPC1, y=meanWeight, color=Stage))
-PikaFinal <- PikaWgtvsumallPC1 + geom_point(aes(shape=Stage), size=4) + 
+PikaFinal <- PikaWgtvsumallPC1 + 
+    geom_point(aes(shape=Stage), size=4, color="black") +
+    geom_point(aes(shape=Stage), size=3) +
+    geom_errorbar(aes(x=sumallPC1, ymin=meanWeight-seWeight, ymax=meanWeight+seWeight)) +  
     labs(x="PC1 (Length of summer)", y = "Mean pika weight (g)") +
     stat_smooth(data=subset(FinalPika, Stage=="Adult"), method="lm", se=F, colour="black", linetype=2, lwd=1) +
-    stat_smooth(data=subset(FinalPika, Stage=="Juvenile"), metho="lm", se=F, colour="black", lwd=1) +
+    stat_smooth(data=subset(FinalPika, Stage=="Juvenile"), method="lm", se=F, colour="black", lwd=1) +
     scale_x_continuous(breaks=c(-1.0, -0.5, 0, 0.5, 1, 1.5)) +
     theme_classic() +
     theme(text=element_text(size=16),
           axis.title.x = element_blank(),
           axis.text.x = element_blank(),
-          axis.title.y=element_text(vjust=1, size=18))
+          axis.title.y=element_text(size= 18, vjust=1))
 
-#tiff("PikaFinal.tiff", width=400, height=400)
-#PikaFinal
-#dev.off()
+tiff("PikaFinal.tiff", width=400, height=400)
+PikaFinal
+dev.off()

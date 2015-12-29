@@ -102,10 +102,21 @@ sum(CleanNO3$NumNO3<0.09) #Metadata says detection limit for NO3 is 0.09 ueq/L.
 CleanNO3 <- subset(CleanNO3, NumNO3>0.07)
 
 #read in lakes elevation data and merge to summarize by elevation type
+setwd("~/Dropbox/NWT_data")
 GLV.elevations <- read.csv("GLV_elevations.csv") %>%
   tbl_df()
 MergedNO3 <- merge(CleanNO3,GLV.elevations, by="Site")
- 
+
+
+##EDIT (12/17/15): Modeling
+#Read in and merge sumallPCA scores to cleaned data, before summarizing#
+setwd("~/Dropbox/NWT_data")
+PCAscores <- read.csv("NWT_Climate_summerPCscores_20151123.csv")
+MergedNO3 <- merge(MergedNO3, PCAscores, by="Year")
+write.csv(MergedNO3, file="MergedNO3.csv")
+
+write.csv(MergedNO3)
+
 #Summary tables for NO3
 #1) Max, min and mean NO3 at all lakes over all years
 SumNO3_SitexMoxYr <- group_by(MergedNO3, Site, Elev_Type, Group, Month, Year) %>%

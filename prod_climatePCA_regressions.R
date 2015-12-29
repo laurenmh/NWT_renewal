@@ -71,21 +71,29 @@ summary(mm.lm) #not signif
 
 #Caitlin uses this gradph for proposal draft 1 figure
 FinalANPP <- ggplot(prodmean, aes(x=sumallPC1, y=meananpp, color=class_3)) +
-    geom_point(aes(shape=class_3), size=4) + 
+    geom_point(aes(shape=class_3), size=4, color="black") +
+    geom_point(aes(shape=class_3), size=3) + 
+    geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp)) +
     ylab(expression(paste("Mean ANPP (g ",m^-2, ")"))) + 
-    geom_smooth(data=subset(prodmean, class_3=="DM"), method="lm", se=F, lwd=1) +
-    geom_smooth(data=subset(prodmean, class_3=="SB"), method="lm", se=F, lwd=1) + 
-    geom_smooth(data=subset(prodmean, class_3=="FF"), method="lm", se=F, linetype=2, lwd=1) +
-    geom_smooth(data=subset(prodmean, class_3=="MM"), method="lm", se=F, linetype=2, lwd=1) +
+    geom_smooth(data=subset(prodmean, class_3=="DM"), method="lm", se=F, lwd=1.5, color="black") +
+    geom_smooth(data=subset(prodmean, class_3=="DM"), method="lm", se=F, lwd=.8) +
+    geom_smooth(data=subset(prodmean, class_3=="SB"), method="lm", se=F, lwd=1.5, color="black") + 
+    geom_smooth(data=subset(prodmean, class_3=="SB"), method="lm", se=F, lwd=.8) + 
+    geom_smooth(data=subset(prodmean, class_3=="FF"), method="lm", se=F, linetype=2, lwd=1.5, color="black") +
+    geom_smooth(data=subset(prodmean, class_3=="FF"), method="lm", se=F, linetype=5, lwd=.8) +
+    geom_smooth(data=subset(prodmean, class_3=="MM"), method="lm", se=F, linetype=2, lwd=1.5, color="black") +
+    geom_smooth(data=subset(prodmean, class_3=="MM"), method="lm", se=F, linetype=5, lwd=.8) +
     theme_classic() + 
     theme(text=element_text(size=16),
           axis.text.x=element_blank(),
           axis.title.x=element_blank(),
           axis.title.y=element_text(vjust=1, size=18)) +
     scale_colour_discrete(name="Habitat") +
-    scale_shape_discrete(name="Habitat")
+    scale_shape_discrete(name="Habitat") +
                           #breaks=c("DM", "FF", "MM", "SB"),
                           #labels=c("Dry meadow", "Fellfield", "Moist meadow", "Snowbed"))
+    geom_point(aes(-1.36,100), color="white") +
+    scale_x_continuous(breaks=c(-1.0,-0.5,0,0.5,1.0,1.5))
 
 tiff("FinalANPP.tiff", width=400, height=400)
 FinalANPP

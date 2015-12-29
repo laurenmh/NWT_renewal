@@ -83,19 +83,26 @@ summary(MaxChla.3) #not signif
 MaxChla.9<-lm(MaxChlA~sumallPC1, subset(GL4_clim, Depth==9 & MaxChlA<10))
 summary(MaxChla.9) #signif at p<0.05
 
-#Caitlin uses this graph for draft 1 of renewal figure  
+#Caitlin uses this graph for renewal figure
+#need to add white/blank point at (-1.5, 0) to make x axis same scale as Pika figure
 singlepanel_ChlA <- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA, color=Depth)) + 
-    geom_point(aes(shape=Depth), size=4) + 
-    geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=2, lwd=1) + 
-    geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=2, lwd=1) +
-    geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=1) +
-    xlab("PC1 (Length of summer)") +
+    geom_point(aes(shape=Depth), size=4, color="black") +
+    geom_point(aes(shape=Depth), size=3) +
+    geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=2, lwd=1.5, color="black") + 
+    geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=5, lwd=.8) + 
+    geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=2, lwd=1.5, color="black") +
+    geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=5, lwd=.8) + 
+    geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=1.5, color="black") +
+    geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=.8) + 
+    #xlab("PC1 (Length of summer)") +
     ylab(expression(paste("Max Chlorophyll ", italic("a")," (",mu,"g ", L^-1,")"))) +
     theme_classic() + 
     theme(text=element_text(size=16),
-          axis.text.x=element_blank(),
+          #axis.text.x=element_blank(),
           axis.title.x=element_blank(),
-          axis.title.y=element_text(vjust=1, size=18))
+          axis.title.y=element_text(vjust=1, size=18)) +
+          geom_point(aes(-1.36,0, alpha=0), color="white") +
+          scale_x_continuous(breaks= c(-1.0, -0.5, 0, 0.5, 1.0, 1.5))
     
 
 tiff("singlepanel_ChlA.tiff", height=400, width=400)
