@@ -115,7 +115,6 @@ PCAscores <- read.csv("NWT_Climate_summerPCscores_20151123.csv")
 MergedNO3 <- merge(MergedNO3, PCAscores, by="Year")
 write.csv(MergedNO3, file="MergedNO3.csv")
 
-write.csv(MergedNO3)
 
 #Summary tables for NO3
 #1) Max, min and mean NO3 at all lakes over all years

@@ -83,31 +83,65 @@ summary(MaxChla.3) #not signif
 MaxChla.9<-lm(MaxChlA~sumallPC1, subset(GL4_clim, Depth==9 & MaxChlA<10))
 summary(MaxChla.9) #signif at p<0.05
 
+
 #Caitlin uses this graph for renewal figure
+## [1] add in Eric Sokol's theme
+# -- plotting parameters and themes
+text.size<-16
+margins.plot<-unit(c(0.5,0.5,0.5,2.5), 'lines') #top, right, bottom, left
+margins.axes<-unit(.25,'lines')
+margins.panel<-unit(3,'lines')
+
+plottheme<-theme(plot.margin = margins.plot,
+                 axis.ticks.margin = margins.axes,
+                 axis.title = element_text(face='plain'))
+
+## [2] remake Lauren's max chl-a figure
 #need to add white/blank point at (-1.5, 0) to make x axis same scale as Pika figure
+#Note 12/29: Katie wants fit lines to be black
 singlepanel_ChlA <- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA, color=Depth)) + 
-    geom_point(aes(shape=Depth), size=4, color="black") +
-    geom_point(aes(shape=Depth), size=3) +
-    geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=2, lwd=1.5, color="black") + 
-    geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=5, lwd=.8) + 
-    geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=2, lwd=1.5, color="black") +
-    geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=5, lwd=.8) + 
-    geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=1.5, color="black") +
-    geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=.8) + 
-    #xlab("PC1 (Length of summer)") +
-    ylab(expression(paste("Max Chlorophyll ", italic("a")," (",mu,"g ", L^-1,")"))) +
-    theme_classic() + 
-    theme(text=element_text(size=16),
-          #axis.text.x=element_blank(),
-          axis.title.x=element_blank(),
-          axis.title.y=element_text(vjust=1, size=18)) +
-          geom_point(aes(-1.36,0, alpha=0), color="white") +
-          scale_x_continuous(breaks= c(-1.0, -0.5, 0, 0.5, 1.0, 1.5))
+        geom_point(aes(shape=Depth), size=4, color="black") +
+        geom_point(aes(shape=Depth), size=3) +
+        geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=2, lwd=1, color="black") + 
+        #geom_smooth(data=subset(GL4_clim, Depth==0), method="lm", se=F, linetype=5, lwd=.8) + 
+        geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=2, lwd=1, color="black") +
+        #geom_smooth(data=subset(GL4_clim, Depth==3), method="lm", se=F, linetype=5, lwd=.8) + 
+        geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=1, color="black") +
+        #geom_smooth(data=subset(GL4_clim, Depth==9), method="lm", se=F, lwd=.8) + 
+        #xlab("PC1 (Length of summer)") +
+        ylab(expression(paste("Max Chlorophyll ", italic("a")," (",mu,"g ", L^-1,")"))) +
+        theme_classic() + 
+        theme(text=element_text(size=text.size),
+              axis.text.x=element_text(size=text.size),
+              axis.title.x=element_blank(),
+              axis.text.y=element_text(size=text.size),
+              axis.title.y=element_text(vjust=1),
+              legend.position="none",
+              aspect.ratio=1) +
+        geom_point(aes(-1.36,0), color="white") +
+        scale_x_continuous(breaks= c(-1.0, -0.5, 0, 0.5, 1.0, 1.5)) +
+        plottheme
     
 
-tiff("singlepanel_ChlA.tiff", height=400, width=400)
+tiff("singlepanel_ChlA3.tiff", height=400, width=500)
 singlepanel_ChlA
 dev.off()
+
+#plot Avg Chl-a just to see.. model not significant at any depth
+ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet"), aes(x=sumallPC1, y=AvgChlA, color=Depth)) + 
+        geom_point(aes(shape=Depth), size=4, color="black") +
+        geom_point(aes(shape=Depth), size=3) + 
+        geom_smooth(method="lm", se=F)
+
+#lm summaries for Avg Chl-a
+AvgChla.0<-lm(AvgChlA~sumallPC1, subset(GL4_clim, Depth==0))
+summary(AvgChla.0) #not signif
+AvgChla.3<-lm(AvgChlA~sumallPC1, subset(GL4_clim, Depth==3))
+summary(AvgChla.3) #not signif
+AvgChla.9<-lm(AvgChlA~sumallPC1, subset(GL4_clim, Depth==9))
+summary(AvgChla.9) #not signif (p=0.1085)
+
+
 
 #and with all levels, graphed by value, then with fit across depths
 singlepanel_ChlA_2<- ggplot(subset(GL4_clim, Depth !="Inlet" & Depth!="Outlet" & MaxChlA<10), aes(x=sumallPC1, y=MaxChlA)) + 

@@ -135,16 +135,35 @@ PikaFinal <- PikaWgtvsumallPC1 +
     geom_point(aes(shape=Stage), size=4, color="black") +
     geom_point(aes(shape=Stage), size=3) +
     geom_errorbar(aes(x=sumallPC1, ymin=meanWeight-seWeight, ymax=meanWeight+seWeight)) +  
-    labs(x="PC1 (Length of summer)", y = "Mean pika weight (g)") +
+    labs(x=NULL, y = "Mean pika weight (g)") +
     stat_smooth(data=subset(FinalPika, Stage=="Adult"), method="lm", se=F, colour="black", linetype=2, lwd=1) +
     stat_smooth(data=subset(FinalPika, Stage=="Juvenile"), method="lm", se=F, colour="black", lwd=1) +
     scale_x_continuous(breaks=c(-1.0, -0.5, 0, 0.5, 1, 1.5)) +
     theme_classic() +
-    theme(text=element_text(size=16),
+    theme(text=element_text(size=text.size),
           axis.title.x = element_blank(),
           axis.text.x = element_blank(),
-          axis.title.y=element_text(size= 18, vjust=1))
+          axis.title.y=element_text(size=text.size),
+          axis.text.y=element_text(size=text.size),
+          legend.position="none") +
+        plottheme
 
-tiff("PikaFinal.tiff", width=400, height=400)
+tiff("PikaFinal.tiff", width=500, height=400)
 PikaFinal
 dev.off()
+
+
+#plotting using cowplot for figure 6
+##requires following R scripts: GLV_NO3analysis.R, prod_climatePCA_regressions.R, GL4_chlA_no3_clim.R
+
+library(cowplot)
+
+Fig6 <- plot_grid(PikaFinal, FinalANPP, singlepanel_ChlA, MeanNO3Final,
+          ncol=2,
+          nrow=2,
+          align="h",
+          rel_heights = c(1,1.2))
+
+save_plot("Fig6_revised_cowplot.pdf", Fig6,
+          base_width = 8,
+          base_aspect_ratio = 3)

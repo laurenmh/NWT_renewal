@@ -145,12 +145,27 @@ plot(allPC2 ~ sumallPC2, data=pcouts2)
 ##More summer over time (PC1 increasing over years)
 #Clean up dataframe for visualizes
 names(sumallyrsVarout)[1:2]=c("sumallPC1", "sumallPC2")
-variable2<-c("Temp", "Precip", "MoistureDeficit", "PET", "GDD", "DaysTo5C", "DaysTo12C", "GSL")
+variable2<-c("Temp", "Precip", "MoistureDeficit", "PET", "GDD", "DaysTo5C", "DaysTo12C", "GSL", "IceOff")
 sumallPCA <-rda(na.exclude(climateSummer[,2:ncol(climateSummer)]), scale=T)
 
+
+## -- CW edits to PC1 over time for draft 2
+## [1] add in Eric Sokol's theme
+# -- plotting parameters and themes
+text.size<-16
+margins.plot<-unit(c(1,0.5,0.5,2.5), 'lines') #top, right, bottom, left
+margins.axes<-unit(.25,'lines')
+margins.panel<-unit(3,'lines')
+
+plottheme<-theme(plot.margin = margins.plot,
+                 axis.ticks.margin = margins.axes,
+                 axis.title = element_text(face='plain'))
+
+
 ##Make a pretty PCA visual of the all years, summer axis
+##CW edit [2]: change axis labels, remove blue labels (will place manually), add theme
 summer_PCA <- ggplot(sumallyrsOutput, aes(x=sumallPC1, y=sumallPC2))+ geom_text(aes(label=site), size=5) +
-  geom_text(data=sumallyrsVarout, aes(x=sumallPC1, y=sumallPC2, label=variable2), size=5, color="blue") +
+  #geom_text(data=sumallyrsVarout, aes(x=sumallPC1, y=sumallPC2, label=variable2), size=5, color="blue") +
   geom_segment(data = sumallyrsVarout,
                aes(x = 0, xend = .9 * sumallPC1,
                    y = 0, yend = .9 * sumallPC2),
@@ -159,13 +174,19 @@ summer_PCA <- ggplot(sumallyrsOutput, aes(x=sumallPC1, y=sumallPC2))+ geom_text(
   scale_y_continuous(limits=c(min(sumallyrsOutput$sumallPC2)-.2,max(sumallyrsOutput$sumallPC2)+.2)) + 
   scale_x_continuous(limits=c(min(sumallyrsOutput$sumallPC1)-.2,max(sumallyrsOutput$sumallPC1)+.2)) +
   #name axes with the proporiton of variance explained
-  xlab(paste("PC1 (",sprintf("%.1f",sumallPCA$CA$eig["PC1"]/sumallPCA$tot.chi*100,3),"%)",sep="")) +
-  ylab(paste("PC2 (",sprintf("%.1f",sumallPCA$CA$eig["PC2"]/sumallPCA$tot.chi*100,3),"%)",sep="")) +
+  #xlab(paste("PC1 (",sprintf("%.1f",sumallPCA$CA$eig["PC1"]/sumallPCA$tot.chi*100,3),"%)",sep="")) +
+  #ylab(paste("PC2 (",sprintf("%.1f",sumallPCA$CA$eig["PC2"]/sumallPCA$tot.chi*100,3),"%)",sep="")) +
+  labs(x="PC1 (Extended Summer)", y="PC2 (precipitation quantity") +
   #add x and y zero lines
   geom_hline(yintercept=0, linetype="dotted") +
   geom_vline(xintercept=0, linetype="dotted") +
-  theme_bw() +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=18))
-  
+  #theme_bw() +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=18))
+  theme_classic() +
+        theme(text = element_text(size = text.size), 
+              axis.text.x = element_text(size=text.size), 
+              axis.text.y = element_text(size=text.size)) +
+        plottheme
+        
 #Make a graph of PC1 over time
 summer_overtime <- ggplot(pcouts2, aes(y=sumallPC1, x=year)) + geom_point() + geom_line() +theme_classic() + geom_smooth(method="lm") + 
   labs(x="Year", y="PC1 (Length of summer)") + theme(text=element_text(size=18)) 
@@ -177,6 +198,24 @@ summary(l)
 tiff("Summer_PCA_overtime.tiff", width=1000, height=500)
 grid.arrange(summer_PCA, summer_overtime, ncol=2)
 dev.off()
+
+
+## CW edit [3] -- remake Lauren's PC1 over time figure with color and thematic adjustments
+summer_overtime_v2 <- ggplot(pcouts2, aes(y=sumallPC1, x=year)) + 
+        geom_point(size=4, color="black") + 
+        geom_point(size=3, color="cyan3") +
+        geom_line(size=1) +
+        theme_classic() + 
+        geom_smooth(method="lm", color="black") + 
+        labs(x="Year", y="PC1 (Extended Summer)") +
+        scale_x_continuous(breaks=seq(from=1980, to=2015, by=5)) +
+        theme_classic() +
+        theme(text = element_text(size = text.size), 
+              axis.text.x = element_text(size=text.size), 
+              axis.text.y = element_text(size=text.size)) +
+        plottheme
+
+
 
 
 ##Other, related visuales
@@ -234,3 +273,85 @@ ggplot(meltOutput, aes(x=year, y=PC1)) + geom_point() + geom_line() + geom_smoot
 # 
 # melt2PCA<-rda(climateMeltout2[,3:ncol(climateMeltout2)], scale=T)
 # plot(melt2PCA, scaling=3)
+
+
+#CW edit [4] -- add in ice out date by year and by PC1 with elevation shown (Fig 5 in renewal)
+iceout<-read.csv("~/Dropbox/NWT_data/NWT_GreenLakes_data/ice, climate and flow_D1_Dan.csv")
+elevation <- read.csv("~/Dropbox/NWT_data/iceout_lakes_elev.csv")
+
+climate_iceout <- iceout[,c(1,3:9)]
+climate_iceout <- climate_iceout %>%
+        gather(Key, DaysfromApril, -year)
+climate_iceout <- merge(climate_iceout, elevation, by ="Key")
+
+#merge PCA scores with iceout climate data
+sumallyrsOutput <- rename(sumallyrsOutput, year=site)
+climate_iceout <- merge(climate_iceout, sumallyrsOutput, by="year")
+
+#plotting ice out by year
+IceoutPanel <- ggplot(climate_iceout, aes(year, DaysfromApril, color=Elevation_m)) + 
+        geom_point(size=4, color="black") +
+        geom_point(size=3) + 
+        scale_color_gradientn(colours=terrain.colors(7), name="Elevation (m)") +
+        geom_smooth(method="lm", color="black") +
+        scale_x_continuous(breaks=seq(from=1980, to =2015, by=5)) +
+        labs(x="Year", y="Ice-off Date (days from April 1)") +
+        theme_classic() +
+        theme(text = element_text(size = text.size), 
+              axis.text.x = element_text(size=text.size), 
+              axis.text.y = element_text(size=text.size)) +
+        plottheme
+
+#plotting ice out by PC1 -- 1/6/16: Katie wants to use this over ice out vs. year
+Iceout_byPC1 <- ggplot(climate_iceout, aes(sumallPC1, DaysfromApril, color=Elevation_m)) + 
+        geom_point(size=4, color="black") +
+        geom_point(size=3) + 
+        scale_color_gradientn(colours=terrain.colors(7), name="Elevation (m)") +
+        geom_smooth(method="lm", color="black") +
+        #scale_x_continuous(breaks=seq(from=1980, to =2015, by=5)) +
+        labs(x="PC1 (Extended Summer)", y="Ice-off Date (days from April 1)") +
+        theme_classic() +
+        theme(text = element_text(size = text.size), 
+              axis.text.x = element_text(size=text.size), 
+              axis.text.y = element_text(size=text.size),
+              legend.position="none") +
+        plottheme
+
+#print 3-panel plot        
+library(cowplot)
+library(gridExtra)
+
+#3 panel plot from draft 1 (PC1 x PC2, PC1 over time, Ice out by year)
+multiplot <- plot_grid(summer_PCA, summer_overtime_v2, IceoutPanel,
+                       nrow=1, 
+                       ncol=3,
+                       align="h",
+                       rel_widths = c(1,1,1.2),
+                       labels=c("A", "B", "C"))
+
+#save_plot('Fig5_revised.pdf', multiplot,
+#          base_height = 8,
+#          base_aspect_ratio = 2.5)
+
+
+#3 panel plot with Ice out by PC1 substituted in
+multiplot_wPC1 <- plot_grid(summer_PCA, summer_overtime_v2, Iceout_byPC1,
+                       nrow=2, 
+                       ncIcol=3,
+                       align="h",
+                       rel_widths = c(1,1,1.2))
+
+#save_plot('Fig5_revised.pdf', multiplot,
+#          base_height = 8,
+#          base_aspect_ratio = 2.5)
+
+
+#3 panel plot with 2 rows, PC1 by year on bottom -- Katie uses this for draft 2
+Fig5 <- ggdraw() +
+        draw_plot(summer_PCA, 0, .5, .5, .5) +
+        draw_plot(Iceout_byPC1, .5, .5, .5, .5) +
+        draw_plot(summer_overtime_v2, 0, 0, 1, .5)
+
+save_plot('Fig5_revised_2.pdf', Fig5,
+          base_height = 11,
+          base_aspect_ratio = 1.3)
