@@ -15,6 +15,21 @@ library(lubridate)
 library(ggplot2)
 library(gridExtra)
 library(broom)
+library(cowplot)
+
+# -- plotting parameters and themes
+text.size<-8
+margins.plot<-unit(c(.75,.75,.25,1), 'lines') #top, right, bottom, left
+#margins.axes<-unit(.25,'lines')
+#margins.panel<-unit(3,'lines')
+
+plottheme<-theme(plot.margin = margins.plot,
+                 #axis.ticks.margin = margins.axes,
+                 axis.title = element_text(
+                         face='plain')
+)
+
+
 
 #Dataset compilation#
 #Read in .csv files created from Tim's infilled C1 and D1 Excel files, plus Emily's Saddle data#
@@ -241,38 +256,50 @@ Yearly_Temp_all <- rbind(Yearly_T.extremes, Chart.temp_Yrly)
 
 #Yearly total precip
 YRLY.PPT <- ggplot(Yearly_PPT_all, aes(Year, PPT, color=Site))
-a <- YRLY.PPT + geom_line(size=1) + 
-        geom_point(aes(shape=Site), size=4, color="black") + 
-        geom_point(aes(shape=Site), size=3) + 
+a <- YRLY.PPT + geom_line(lwd=.5) + 
+        geom_point(aes(shape=Site), size=2, color="black") + 
+        geom_point(aes(shape=Site), size=1) + 
         ylab(expression(paste("Precipitation (mm yr"^-1,")"))) +
         #geom_smooth(colour="black", data=subset(Yearly_PPT, Site=="D1" & Year<1977), method = lm, se=FALSE, lwd=1) +
         #geom_smooth(colour="black", data=subset(Yearly_PPT, Site=="D1" & Year>1977), method = lm, se=FALSE, lwd=1) +
         geom_smooth(colour="black", linetype=2,data=subset(Yearly_PPT, Site=="C1" & Year<1977), method = lm, se=FALSE, lwd=1) +
         geom_smooth(colour="black", linetype=2,data=subset(Yearly_PPT, Site=="C1" & Year>1977 & Year<2011), method = lm, se=FALSE, lwd=1) +
-        geom_vline(x=1977, colour="black", linetype=4, lwd=1) +
-        geom_segment(y=990, yend=990, x=1952, xend=1976, color="black", lwd=1) +
-        geom_segment(y=1156, yend=1156, x=1978, xend= 2010, color="black", lwd=1) + 
-        theme_classic(base_size = 16) +
+        geom_vline(aes(xintercept=1977), colour="black", linetype=4, lwd=.75) +
+        geom_segment(y=990, yend=990, x=1952, xend=1976, color="black", lwd=.5) +
+        geom_segment(y=1156, yend=1156, x=1978, xend= 2010, color="black", lwd=.5) + 
+        scale_colour_manual(values=c("D1" = "deep sky blue1", "C1"="springgreen3")) +
+        theme_classic() +
         #geom_text(aes(2005, 1500, label = "D1 - High Alpine"), size=5, colour="black") +
         #geom_text(aes(2005, 400, label = "C1 - Subalpine"), size=5, colour="black") +
         #geom_text(aes(1978, 420, label = "1976/77 PDO \n Regime Shift"), colour="black", hjust=0, family="Courier") +
-        geom_point(aes(1954, 10), color="white") +
-        geom_point(aes(1954, 1799), color="white") +
-        scale_y_continuous(breaks= c(seq(from=0, to=1800, by=200))) + 
-        scale_x_continuous(breaks= c(seq(from=1950, to=2015, by=10))) + 
-        theme(legend.position="none", axis.title.x = element_blank(),
-                axis.text = element_text(size = 16),
-                axis.title.y = element_text(vjust=1, size=18))
+        #geom_point(aes(1954, 10), color="white") +
+        #geom_point(aes(1954, 1799), color="white") +
+        scale_y_continuous(breaks= c(seq(from=0, to=1800, by=200)),
+                           limits=c(0,1800),
+                           expand=c(0,0)) + 
+        scale_x_continuous(breaks= c(seq(from=1950, to=2015, by=10)), 
+                           limits=c(1950,2015),
+                           expand=c(0,0)) + 
+        theme(text = element_text(size=text.size),
+              legend.position="none", 
+              axis.title.x = element_blank(),
+              axis.text = element_text(size = text.size), 
+              axis.text.x = element_text(margin=margin(3,5,5,5,"pt")),
+              axis.text.y = element_text(margin=margin(5,3,5,5,"pt")),
+              axis.title.y = element_blank())+
+              #axis.title.y = element_text(size=text.size, margin=margin(5,13,5, 5,"pt"))) +
+        plottheme
+        #coord_fixed(ratio=1/40)
 
-tiff("YearlyPrecip2.tiff", width=630, height=400)
-a
-dev.off()
+#tiff("YearlyPrecip2.tiff", width=630, height=400)
+#a
+#dev.off()
 
 #Mean monthly total precip#
 MNLY.PPT <- ggplot(MonthlyPPT, aes(Month, Trend, color=Site))
 b <- MNLY.PPT + geom_line(aes(group=Site), size=1) + 
-        geom_point(aes(shape=Site), size=4, color="black") +
-        geom_point(aes(shape=Site), size=3) +
+        geom_point(aes(shape=Site), size=6, color="black") +
+        geom_point(aes(shape=Site), size=5) +
         geom_hline(yintercept=0) +
         ylab(expression(paste("Precipitation Trend (mm mo"^-1, yr^-1,")"))) +
         #geom_text(aes(11, 0.7, label = "D1 - High Alpine"), size=5, colour="black") +
@@ -285,14 +312,19 @@ b <- MNLY.PPT + geom_line(aes(group=Site), size=1) +
         scale_y_continuous(breaks=c(seq(from=-1, to=1.5, by=0.5))) +
         geom_point(aes(1,-1), color="white") +
         geom_point(aes(1, 1.5), color="white") +
-        theme_classic(base_size = 16) +
-        theme(legend.position="none", axis.title.x = element_blank(),
-                axis.text = element_text(size = 16),
-                axis.title.y = element_text(vjust=1, size=18))
+        scale_colour_manual(values=c("D1" = "deep sky blue1", "C1"="dark green")) +
+        theme_classic() +
+        theme(text = element_text(size=text.size),
+              legend.position="none", 
+              axis.title.x = element_blank(),
+              #axis.text.x = element_text(margin=margin(10,5,5,5,"pt")),
+              axis.text.x=element_blank(),
+              axis.text.y = element_text(size=text.size, margin=margin(5,10,5,5,"pt")),
+              axis.title.y = element_text(size=text.size, margin=margin(5,13,5, 5,"pt")))
 
-tiff("MonthlyPrecip.tiff", width=600, height=400)
-b
-dev.off()
+#tiff("MonthlyPrecip.tiff", width=600, height=400)
+#b
+#dev.off()
 
 #Temperature - Diurnal only
 #YRLY.DIURNAL <- ggplot(Yearly_Diurnal, aes(Year, DiurnalMean, color=Site))
@@ -313,28 +345,37 @@ YRLY.TMAX <- ggplot(Yearly_Temp_all, aes(Year, Tmax, color=Site))
 
 #add significance points
 
-c <- YRLY.TMAX + geom_line() +
-        geom_point(aes(shape=Site), size=4, color="black") +
-        geom_point(aes(shape=Site), size=3) + 
+c <- YRLY.TMAX + geom_line(lwd=.5) +
+        geom_point(aes(shape=Site), size=2, color="black") +
+        geom_point(aes(shape=Site), size=1) + 
         ylab(expression(paste("Maximum Temperature ("*degree*C,")"))) + 
-        geom_smooth(colour="black", data=subset(Yearly_Temp_all, Site=="D1" & Year<2011), method = lm, se=FALSE, lwd=1) +
-        geom_smooth(colour="black", data=subset(Yearly_Temp_all, Site=="C1" & Year<2011), method = lm, se=FALSE, lwd=1) +
-        theme_classic(base_size = 16) +
+        geom_smooth(colour="black", data=subset(Yearly_Temp_all, Site=="D1" & Year<2011), method = lm, se=FALSE, lwd=.5) +
+        geom_smooth(colour="black", data=subset(Yearly_Temp_all, Site=="C1" & Year<2011), method = lm, se=FALSE, lwd=.5) +
+        theme_classic() +
         #geom_text(aes(2000, 8.5, label = "D1 - High Alpine"), size=5, colour="black") +
         #geom_text(aes(2000, 11.5, label = "C1 - Subalpine"), size=5, colour="black") +
-        scale_y_continuous(breaks=c(seq(from=0, to=40, by=5))) +
-        scale_x_continuous(breaks= c(seq(from=1950, to=2015, by=10))) +
-        geom_point(aes(1954, 11), color="white") +
-        geom_point(aes(1954, 39), color="white") +
+        scale_y_continuous(breaks=c(seq(from=10, to=35, by=5)),
+                           limits=c(10,35),
+                           expand=c(0,0)) +
+        scale_x_continuous(breaks= c(seq(from=1950, to=2015, by=10)),
+                           limits=c(1950, 2015),
+                           expand=c(0,0)) +
+        scale_colour_manual(values=c("D1" = "deep sky blue1", "C1"="springgreen3")) +
         theme(legend.position="none",
-              axis.text = element_text(size = 16),
-              axis.title.x = element_blank(),
-              axis.title.y = element_text(vjust=1, size=18))
+              axis.text = element_text(size = text.size), 
+              axis.text.x = element_text(margin=margin(3,5,5,5,"pt")),
+              axis.text.y = element_text(margin=margin(5,3,5,5,"pt")),
+              #axis.title.y = element_text(size=text.size, margin=margin(5,13,5, 5,"pt")),
+              #axis.title.x = element_text(size=18, margin=margin(15,5,5,5, "pt"))) +
+              axis.title.y=element_blank(),
+              axis.title.x= element_blank()) +
+        plottheme
+        #coord_fixed()
 
 
-tiff("YearlyTmax.tiff", width=600, height=400)
-c
-dev.off()
+#tiff("YearlyTmax.tiff", width=600, height=400)
+#c
+#dev.off()
 
 #NOT USING ANY TEMP GRAPHS BELOW HERE#
 
@@ -369,25 +410,33 @@ dev.off()
 
 #Monthly temp trends over time#
 MNLY.Temp <- ggplot(MonthlyTmax, aes(Month, Trend, color=Site))
-d <- MNLY.Temp + geom_line(aes(group=Site), lwd=1) + 
-        geom_point(aes(shape=Site), size=4, color="black") +
-        geom_point(aes(shape=Site), size=3) +
+d <- MNLY.Temp + geom_line(aes(group=Site), lwd=.5) + 
+        geom_point(aes(shape=Site), size=2, color="black") +
+        geom_point(aes(shape=Site), size=1) +
         ylab(expression(paste("Maximum Temperature Trend ("*degree*C," ", yr^-1,")"))) +
         geom_hline(yintercept=0) +
-        scale_y_continuous(breaks=c(seq(from=-0.04, to=0.10, by=0.02))) +
-        geom_point(aes(1,-0.02), color="white") +
-        theme_classic(base_size = 16) +
+        scale_y_continuous(breaks=c(seq(from=-0.02, to=0.12, by=0.02)),
+                           limits=c(-0.02, 0.12),
+                           expand=c(0,0)) +
+        #scale_x_discrete(expand=c(0.1,0.1)) +
+        scale_colour_manual(values=c("D1" = "deep sky blue1", "C1"="springgreen3")) +
+        theme_classic() +
         theme(legend.position="none",
-        axis.text = element_text(size = 16),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(vjust=1, size=18)) + 
-        geom_text(data=subset(MonthlyTmax2, Pval<0.05 & Pval>0.01), aes(Month, Point), label="*", color="black", size=6) +
-        geom_text(data=subset(MonthlyTmax2, Pval<0.01 & Pval>0.001), aes(Month, Point), label="**", color="black", size=6) +
-        geom_text(data=subset(MonthlyTmax2, Pval<0.001), aes(Month, Point), label="***", color="black", size=6)
+              axis.text = element_text(size = text.size),
+              axis.title.x = element_blank(),
+              axis.text.x = element_text(margin=margin(3,5,5,5,"pt")),
+              axis.text.y = element_text(margin=margin(5,3,5,5,"pt")),
+              axis.title.y=element_blank()) +
+              #axis.title.y = element_text(size=text.size, margin=margin(5,13,5, 5,"pt"))) + 
+        geom_text(data=subset(MonthlyTmax2, Pval<0.05 & Pval>0.01), aes(Month, Point), label="*", color="black", size=4) +
+        geom_text(data=subset(MonthlyTmax2, Pval<0.01 & Pval>0.001), aes(Month, Point), label="**", color="black", size=4) +
+        geom_text(data=subset(MonthlyTmax2, Pval<0.001), aes(Month, Point), label="***", color="black", size=4) +
+        plottheme
+        #coord_fixed(ratio=60)
 
-tiff("MonthlyTMax.tiff", width=600, height=400)
-d
-dev.off()
+#tiff("MonthlyTMax.tiff", width=600, height=400)
+#d
+#dev.off()
 
 #Not using these (for now)
 
@@ -426,8 +475,19 @@ dev.off()
 #MNLY.MinT + geom_line(aes(group=Site)) + geom_point(aes(shape=Site)) + ylab("Temperature (deg. C)") + theme_classic()
 
 #Print all graphs to 4-panel figure
-grid.arrange(a,b,c,d)
+#grid.arrange(a,b,c,d)
 
+##--Update Jan 21, 2016: Use cowplot to place all four panels on one plot
+##KS wants b (monthly temp trends) replaced by ice-off date plotted by year instead of PC1
+##Use R script "climate_PCA.R" for ice out panel
+
+Fig4_wIceOff <- plot_grid(a,IceoutPanel,c,d,
+                          nrow=2,
+                          align="v")
+
+save_plot("Fig4_wIceOut6.pdf", Fig4_wIceOff,
+          base_height = 3.4,
+          base_aspect_ratio = 1.9)
 
 #QA check on chart data
 tapply(Chart.D1dailytemp.11to14$Tmax, list(Chart.D1dailytemp.11to14$Year,Chart.D1dailytemp.11to14$Month), function(x) sum(is.na(x)))

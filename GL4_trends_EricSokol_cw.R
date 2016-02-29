@@ -9,14 +9,11 @@ GL4_long <- read.csv("ice, climate and flow_D1_Dan.csv")
 GL4 <-read.csv("long term data_Dan_fixed.csv")
 
 # -- plotting parameters and themes
-text.size<-10
+text.size<-8
 limits.x<-c(65, 130)
-margins.plot<-unit(c(0,0,0.5,2.5), 'lines') #top, right, bottom, left
-margins.axes<-unit(.25,'lines')
-margins.panel<-unit(3,'lines')
+margins.plot<-unit(c(0,0,.1,0), 'lines') #top, right, bottom, left
 
 plottheme<-theme(plot.margin = margins.plot,
-      axis.ticks.margin = margins.axes,
       axis.title = element_text(
         face='plain')
 )
@@ -24,15 +21,18 @@ plottheme<-theme(plot.margin = margins.plot,
 #------flushing rate
 limits <- aes(ymax = flushing + flushing._se, ymin = flushing - flushing._se)
 figa <- ggplot(GL4_long, aes(gl4,flushing)) + 
-        geom_point(size = 4, color="black") +
-        geom_point(size = 3, color="cyan 3") +
+        stat_smooth(method = "lm", colour = "black", lwd=.5) +
+        geom_point(size = 1, color="black") +
+        geom_point(size = .5, color="dodger blue4") +
         theme_classic() +
         theme(text = element_text(size = text.size), 
-        axis.text.x = element_blank(), 
-        axis.text.y = element_text(size=text.size)) + 
-        stat_smooth(method = "lm", colour = "black") +
+              axis.text.x = element_blank(), 
+              axis.text.y = element_text(size=text.size, margin=margin(5,3,5,5,"pt")),
+              axis.title.x=element_blank(),
+              axis.title.y=element_blank()) +
+              #axis.title.y = element_text(size=text.size, margin=margin(5,5,5, 5,"pt"))) + 
         geom_errorbar(limits, width = 0.5, size = 0.3) +
-        labs(x = NULL, y="\nFlushing (days)\n") +
+        #labs(x = NULL, y="Flushing \n(days)") +
         scale_x_continuous(limits = limits.x) +
         plottheme
 # figa
@@ -40,7 +40,7 @@ figa <- ggplot(GL4_long, aes(gl4,flushing)) +
 
 ## CW edit: compare flushing rate (days) against PCA1 scores
 #(1)read in PCA scores
-library(tidry)
+library(tidyr)
 library(dplyr)
 PCAscores <- read.csv("~/Dropbox/NWT_data/NWT_Climate_summerPCscores_20151123.csv")
 PCAscores <- rename(PCAscores, year=Year)
@@ -80,15 +80,18 @@ figa_wPCA1 <- ggplot(GL4_long, aes(sumallPC1, flushing)) +
 #-------stratification
 limits <- aes(ymax = strat + strat_se, ymin = strat - strat_se)
 figb <- ggplot(GL4, aes(ice,strat)) + 
-        geom_point(size = 4, color="black") +
-        geom_point(size = 3, color = "cyan 3") + 
+        stat_smooth(method = "lm", colour = "black", lwd=.5) +
+        geom_point(size = 1, color="black") +
+        geom_point(size = .5, color = "dodger blue4") + 
         theme_classic() +
         theme(text = element_text(size = text.size), 
               axis.text.x = element_blank(), 
-                axis.text.y = element_text(size=text.size)) + 
-        stat_smooth(method = "lm", colour = "black") +
+              axis.text.y = element_text(size=text.size, margin=margin(5,3,5,5,"pt")),
+              axis.title.x=element_blank(),
+              axis.title.y=element_blank()) +
+              #axis.title.y = element_text(size=text.size, margin=margin(5,5,5, 5,"pt"))) + 
         geom_errorbar(limits, width = 0.5, size = 0.3) +
-        labs(x = NULL, y=expression(paste("Stratification (",degree~C,")"))) +
+        #labs(x = NULL, y=expression(paste("Stratification\n\n\n(",degree~C,")"))) +
         scale_x_continuous(limits = limits.x) +
         plottheme
 
@@ -143,15 +146,18 @@ figb_wPCA1 <- ggplot(GL4, aes(sumallPC1, strat)) +
 #-------DOC
 limits <- aes(ymax = doc + se_doc, ymin = doc - se_doc)
 figm <- ggplot(GL4, aes(ice,doc)) + 
-        geom_point(size = 4) +
-        geom_point(size = 3, color = "cyan 3") + 
+        stat_smooth(method = "lm", colour = "black", linetype=2, se=F, lwd=.5) + 
+        geom_point(size = 1) +
+        geom_point(size = .5, color = "dodger blue4") + 
         theme_classic() +
          theme(text = element_text(size = text.size), 
                 axis.text.x = element_blank(), 
-                axis.text.y = element_text(size=text.size)) + 
+                axis.text.y = element_text(size=text.size, margin=margin(5,3,5, 5,"pt")),
+               axis.title.x=element_blank(),
+               axis.title.y=element_blank()) +
+               #axis.title.y = element_text(size=text.size, margin=margin(5,5,5, 5,"pt"))) + 
         geom_errorbar(limits, width = 0.5, size = 0.3) +
-        stat_smooth(method = "lm", colour = "black", linetype=2, se=F) + 
-        labs(x = NULL, y = expression(paste("DOC (mg ",L^-1,")"))) +
+        #labs(x = NULL, y = expression(paste("DOC (mg ",L^-1,")"))) +
         scale_x_continuous(limits = limits.x) +
         plottheme
         # figm
@@ -177,7 +183,8 @@ figm_wPCA1 <- ggplot(GL4, aes(sumallPC1, doc)) +
         theme_classic() +
         theme(text = element_text(size = text.size), 
               axis.text.x = element_text(size=text.size), 
-              axis.text.y = element_text(size=text.size)) + 
+              axis.text.y = element_text(size=text.size, margin=margin(5,5,5, 5,"pt")),
+              axis.title.y = element_text(size=16, margin=margin(5,8,5, 5,"pt"))) + 
         plottheme
         #theme(legend.position="none",
         #      axis.text.x = element_blank(),
@@ -189,15 +196,18 @@ figm_wPCA1 <- ggplot(GL4, aes(sumallPC1, doc)) +
 #---------------------------Chlorophyll-a
 limits <- aes(ymax = chl_new + chl_new_se, ymin = chl_new - chl_new_se) 
 figv <- ggplot(GL4, aes(ice,chl_new)) + 
-        geom_point(size=4) +
-        geom_point(size = 3, color="cyan 3") + 
+        stat_smooth(method = "lm", colour = "black", lwd=.5) +
+        geom_point(size=1) +
+        geom_point(size = .5, color="dodger blue4") + 
         theme_classic() +
         theme(text = element_text(size=text.size), 
                 axis.text.x = element_blank(), 
-                axis.text.y = element_text(size=text.size)) + 
-        stat_smooth(method = "lm", colour = "black") +
+              axis.text.y = element_text(size=text.size, margin=margin(5,3,5, 5,"pt")),
+              axis.title.x=element_blank(),
+              axis.title.y=element_blank()) +
+              #axis.title.y = element_text(size=text.size, margin=margin(5,5,5, 5,"pt"))) + 
         geom_errorbar(limits, width = 0.5, size = 0.3) +
-        labs(x = NULL , y = expression(paste("Chl-", italic("a")," (",mu,"g ", L^-1,")"))) +
+        #labs(x = NULL , y = expression(paste("Chl-", italic("a"),"\n (",mu,"g ", L^-1,")"))) +
         scale_x_continuous(limits = limits.x) +
         plottheme
 
@@ -213,7 +223,7 @@ summary(chla.iceout.lm) #significant! with higher Rsquare
 
 #(2) plot
 figv_wPCA1 <- ggplot(GL4, aes(sumallPC1, chl_new)) + 
-        geom_point(size = 4) + 
+        geom_point(size = 3) + 
         stat_smooth(method = "lm", colour = "black", se=F, lwd=1, linetype=2) +
         geom_errorbar(limits) +
         labs(x = NULL, y=expression(paste("Chl-", italic("a")," (",mu,"g ", L^-1,")"))) +
@@ -234,17 +244,21 @@ figv_wPCA1 <- ggplot(GL4, aes(sumallPC1, chl_new)) +
 #-------Daphnia
 
 figt <- ggplot(GL4, aes(ice,dapul)) + 
-        geom_point(size = 4) + 
-        geom_point(size = 3, color = "cyan 3") +
+        stat_smooth(method = "lm", colour = "black", lwd=.5) +
+        geom_point(size = 1) + 
+        geom_point(size = .5, color = "dodger blue4") +
         theme_classic() +
         theme(text = element_text(size=text.size), 
-                axis.text.x = element_text(size=text.size), 
-                axis.text.y = element_text(size=text.size)) + 
-         stat_smooth(method = "lm", colour = "black") +
-        labs(x = "\nIce Out Date (days from April 1)", 
-        y =expression(paste(italic("Daphnia")," (indiv. ", L^-1,")"))) +
+                axis.text.x = element_text(size=text.size, margin=margin(3,5,5,5,"pt")),
+              axis.text.y = element_text(size=text.size, margin=margin(5,3,5, 5,"pt")),
+              axis.title.y=element_blank(),
+              axis.title.x=element_blank()) +
+              #axis.title.y = element_text(size=text.size, margin=margin(5,5,5, 5,"pt")),
+              #axis.title.x = element_text(size=text.size, margin=margin(5,5,5, 5,"pt"), hjust = 0.8)) + 
+        #labs(x = "Ice Out Date (days from April 1)", 
+        #y =expression(paste(italic("Daphnia"),"\n (indiv. ", L^-1,")"))) +
         scale_x_continuous(limits = limits.x) +
-        scale_y_continuous(limits = c(-1.5,4), breaks = seq(0,4, by =1)) +
+        scale_y_continuous(limits = c(-1.3,4), breaks = seq(0,4, by =1)) +
         plottheme
 
 ## CW edit: compare Daphnia density against PCA1 scores
@@ -284,24 +298,23 @@ require(gridExtra)
 graphics.off()
 # windows(4,8)
 multiplot<-plot_grid(figa,figb,figm,figv,figt, 
-                     labels=c('(A)','(B)','(C)','(D)','(E)'), 
                      ncol=1, nrow=5,
-                     rel_heights = c(1,1,1,1,1.2),
+                     rel_heights = c(1,1,1,1,1.4),
                      align='v')
 # multiplot
 
 # ggsave("Fig_plt.pdf", width = 16, height = 9, dpi = 120)
-save_plot('Fig_plot.pdf', multiplot,
-          base_height = 8,
+save_plot('Fig_Sokol_4.pdf', multiplot,
+          base_height = 2.75,
           base_aspect_ratio = .5)
 
 ##CW edit: multipanel PC1 score plots
 multiplot_wPCA1<-plot_grid(figa_wPCA1,figb_wPCA1,figm_wPCA1,figv_wPCA1,figt_wPCA1, 
                      labels=c('(A)','(B)','(C)','(D)','(E)'), 
                      ncol=1, nrow=5,
-                     rel_heights = c(1,1,1,1,1.2),
+                     rel_heights = c(1,1,1,1,1.6),
                      align='v')
 
 save_plot('Fig_plot_wPCA.pdf', multiplot_wPCA1,
-          base_height = 8,
-          base_aspect_ratio = .5)
+          base_height = 11,
+          base_aspect_ratio = .3)

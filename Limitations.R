@@ -10,14 +10,13 @@ setwd("~/Documents/Suding Lab/NWT LTER/Katherine_Wentz")
 
 
 # -- plotting parameters and themes (borrowed from Eric Sokol's graphs)
-text.size<-10
+text.size<-8
 limits.x<-c(0, 150)
-margins.plot<-unit(c(0,0,0.5,2.5), 'lines') #top, right, bottom, left
+margins.plot<-unit(c(0.25,0.4,0.25,.25), 'lines') #top, right, bottom, left
 margins.axes<-unit(.25,'lines')
 margins.panel<-unit(3,'lines')
 
 plottheme<-theme(plot.margin = margins.plot,
-                 axis.ticks.margin = margins.axes,
                  axis.title = element_text(
                          face='plain')
 )
@@ -101,12 +100,18 @@ Bottom <- ggplot(my.df.2002.limited.subset,
         #geom_point() + 
         geom_line(lwd=1) +
         geom_ribbon(aes(ymin=0, ymax=my.df.2002.limited.subset$CorrectedFit2, fill=Model), alpha=0.2) +
-        xlim(c(0,150)) +
         theme_classic() +
-        labs(x = "Days from May 1", y=NULL) +
+        labs(x=NULL,y=NULL) +
+        #labs(x = "Days from May 1", y=NULL) +
+        scale_y_continuous(breaks=seq(from=0, to=1, by=0.25),
+                           limits=c(0,1),
+                           expand=c(0,0)) +
+        scale_x_continuous(limits=c(0,151),
+                           expand=c(0,0)) +
         theme(text = element_text(size = text.size), 
-              axis.text.x = element_text(size=text.size),
-              axis.text.y = element_text(size=text.size),
+              axis.text.x = element_text(size=text.size, margin=margin(3,5,5,5,"pt")),
+              #axis.text.y = element_text(size=text.size, margin=margin(5,3,5,5,"pt")),
+              axis.text.y=element_blank(),
               legend.position = "none") +
         plottheme
         #scale_fill_brewer(palette="Set2") +
@@ -146,13 +151,17 @@ Top <- ggplot(my.df.2004.limited.subset,
         #geom_point() + 
         geom_line(lwd=1) +
         geom_ribbon(aes(ymin=0, ymax=my.df.2004.limited.subset$CorrectedFit2, fill=Model), alpha=0.2) +
-        xlim(c(0,150)) +
         theme_classic() +
         labs(x = NULL, y=NULL) +
+        scale_y_continuous(breaks=seq(from=0, to=1, by=0.25),
+                           limits=c(0,1),
+                           expand=c(0,0)) +
+        scale_x_continuous(limits=c(0,151),
+                           expand=c(0,0)) +
         theme(text = element_text(size = text.size), 
-              axis.text.x = element_blank(),
-              axis.text.y = element_text(size=text.size),
-              legend.position = "top",
+              axis.text.x = element_text(size=text.size, margin=margin(3,5,5,5,"pt")),
+              axis.text.y = element_text(size=text.size, margin=margin(5,3,5,5, "pt")),
+              legend.position = "none",
               legend.title=element_blank()) +
         plottheme
 
@@ -190,12 +199,17 @@ Middle<- ggplot(my.df.2005.limited.subset,
         #geom_point() + 
         geom_line(lwd=1) +
         geom_ribbon(aes(ymin=0, ymax=my.df.2005.limited.subset$CorrectedFit2, fill=Model), alpha=0.2) +
-        xlim(c(0,150)) +
         theme_classic() +
         labs(x = NULL, y=NULL) +
+        scale_y_continuous(breaks=seq(from=0, to=1, by=0.25),
+                           limits=c(0,1),
+                           expand=c(0,0)) +
+        scale_x_continuous(limits=c(0,151),
+                           expand=c(0,0)) +
         theme(text = element_text(size = text.size), 
-              axis.text.x = element_blank(),
-              axis.text.y = element_text(size=text.size),
+              axis.text.x = element_text(size=text.size, margin=margin(3,5,5,5,"pt")),
+              #axis.text.y = element_text(size=text.size, margin=margin(5,3,5,5,"pt")),
+              axis.text.y=element_blank(),
               legend.position = "none") +
         plottheme
 #scale_fill_brewer(palette="Set2") +
@@ -265,11 +279,16 @@ require(gridExtra)
 #multiplot_wGS <- plot_grid(top, middle, bottom, ncol =1, nrow=3, align="v")
 #multiplot <- plot_grid(top, middle, bottom, ncol=1, nrow=3, align="v")
 multiplot_summer <- plot_grid(Top, Middle, Bottom, 
-                              ncol=1, 
-                              nrow=3, 
-                              rel_heights = c(1.2,1,1.2),
-                              align="v")
+                              ncol=3, 
+                              nrow=1, 
+                              rel_widths = c(1.2,1,1),
+                              align="h")
 
-save_plot("Fig9_revised.pdf", multiplot_summer,
-          base_height = 8,
-          base_aspect_ratio = .5)
+save_plot("Fig9_revised_20160217_1.pdf", multiplot_summer,
+          base_height = 2.45,
+          base_aspect_ratio = .55)
+
+
+save_plot("Fig13_revised_toppanel.pdf", multiplot_summer,
+          base_height = 1.5,
+          base_aspect_ratio = 3.46)

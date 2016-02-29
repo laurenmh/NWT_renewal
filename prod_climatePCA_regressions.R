@@ -72,31 +72,37 @@ summary(mm.lm) #not signif
 #Caitlin uses this gradph for proposal draft 1 figure
 #Note, 12/19: Katie wants to drop FF from plot, and change all fit lines to black
 FinalANPP <- ggplot(data=subset(prodmean, class_3 !="FF"), aes(x=sumallPC1, y=meananpp, color=class_3)) +
-    geom_point(aes(shape=class_3), size=4, color="black") +
-    geom_point(aes(shape=class_3), size=3) + 
-    geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp)) +
-    ylab(expression(paste("Mean ANPP (g ",m^-2, ")"))) + 
-    geom_smooth(data=subset(prodmean, class_3=="DM"), method="lm", se=F, lwd=1, color="black") +
+        geom_errorbar(aes(x=sumallPC1, ymin=meananpp-seanpp, ymax=meananpp + seanpp), color="black") +
+        geom_point(aes(shape=class_3), size=2, color="black") +
+        geom_point(aes(shape=class_3), size=1) + 
+    #ylab(expression(paste("Mean ANPP (g ",m^-2, ")"))) + 
+    labs(x=NULL, y=NULL) +
+        geom_smooth(data=subset(prodmean, class_3=="DM"), method="lm", se=F, lwd=.5, color="black") +
     #geom_smooth(data=subset(prodmean, class_3=="DM"), method="lm", se=F, lwd=.8) +
-    geom_smooth(data=subset(prodmean, class_3=="SB"), method="lm", se=F, lwd=1, color="black") + 
+    geom_smooth(data=subset(prodmean, class_3=="SB"), method="lm", se=F, lwd=.5, color="black") + 
     #geom_smooth(data=subset(prodmean, class_3=="SB"), method="lm", se=F, lwd=.8) + 
     #geom_smooth(data=subset(prodmean, class_3=="FF"), method="lm", se=F, linetype=2, lwd=1.5, color="black") +
     #geom_smooth(data=subset(prodmean, class_3=="FF"), method="lm", se=F, linetype=5, lwd=.8) +
-    geom_smooth(data=subset(prodmean, class_3=="MM"), method="lm", se=F, linetype=2, lwd=1, color="black") +
+    geom_smooth(data=subset(prodmean, class_3=="MM"), method="lm", se=F, linetype=2, lwd=.5, color="black") +
     #geom_smooth(data=subset(prodmean, class_3=="MM"), method="lm", se=F, linetype=5, lwd=.8) +
-    theme_classic() + 
+        scale_x_continuous(breaks=seq(from=-1.5, to=1.5, by=0.5),
+                           limits=c(-1.5, 1.75),
+                           expand=c(0,0)) +
+        scale_y_continuous(breaks=seq(from=40, to=240, by=40),
+                           limits=c(40, 240),
+                           expand=c(0,0)) +
+        scale_color_manual(values=c("dark turquoise", "goldenrod2", "dodger blue4")) +
+        theme_classic() + 
     theme(text=element_text(size=text.size),
           axis.text.x=element_blank(),
           axis.title.x=element_blank(),
-          axis.title.y=element_text(size=text.size),
-          axis.text.y=element_text(size=text.size),
+          #axis.title.y=element_text(size=text.size, margin=margin(5,13,5,5,"pt")),
+          axis.text.y=element_text(size=text.size, margin=margin(5,3,5,5, "pt")),
           legend.position="none") +
     #scale_colour_discrete(name="Habitat") +
     #scale_shape_discrete(name="Habitat") +
                           #breaks=c("DM", "FF", "MM", "SB"),
                           #labels=c("Dry meadow", "Fellfield", "Moist meadow", "Snowbed"))
-    geom_point(aes(-1.36,100), color="white") +
-    scale_x_continuous(breaks=c(-1.0,-0.5,0,0.5,1.0,1.5)) +
         plottheme
 
 tiff("FinalANPP3.tiff", width=500, height=400)

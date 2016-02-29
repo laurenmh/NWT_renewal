@@ -153,38 +153,56 @@ sumallPCA <-rda(na.exclude(climateSummer[,2:ncol(climateSummer)]), scale=T)
 ## [1] add in Eric Sokol's theme
 # -- plotting parameters and themes
 text.size<-16
-margins.plot<-unit(c(1,0.5,0.5,2.5), 'lines') #top, right, bottom, left
-margins.axes<-unit(.25,'lines')
-margins.panel<-unit(3,'lines')
+margins.plot<-unit(c(1.5,1.5,1,2), 'lines') #top, right, bottom, left
+#margins.axes<-unit(.25,'lines')
+#margins.panel<-unit(3,'lines')
 
 plottheme<-theme(plot.margin = margins.plot,
-                 axis.ticks.margin = margins.axes,
+                 #axis.ticks.margin = margins.axes,
                  axis.title = element_text(face='plain'))
 
 
 ##Make a pretty PCA visual of the all years, summer axis
 ##CW edit [2]: change axis labels, remove blue labels (will place manually), add theme
-summer_PCA <- ggplot(sumallyrsOutput, aes(x=sumallPC1, y=sumallPC2))+ geom_text(aes(label=site), size=5) +
-  #geom_text(data=sumallyrsVarout, aes(x=sumallPC1, y=sumallPC2, label=variable2), size=5, color="blue") +
-  geom_segment(data = sumallyrsVarout,
-               aes(x = 0, xend = .9 * sumallPC1,
-                   y = 0, yend = .9 * sumallPC2),
-               arrow = arrow(length = unit(0.25, "cm")), colour = "grey") + 
+summer_PCA <- ggplot(sumallyrsOutput, aes(x=sumallPC1, y=sumallPC2)) +
+        #geom_point() +
+        #add x and y zero lines
+        geom_hline(yintercept=0, linetype="dotted") +
+        geom_vline(xintercept=0, linetype="dotted") +
+        geom_segment(data = sumallyrsVarout,
+                     aes(x = 0, xend = .9 * sumallPC1,
+                         y = 0, yend = .9 * sumallPC2),
+                     arrow = arrow(length = unit(0.25, "cm")), colour = "grey") +
+        geom_text(aes(label=site), size=5, check_overlap=T) +
+        geom_text(data=subset(sumallyrsOutput, site==1998 | site== 2014 | site==2003), aes(x=sumallPC1+.1, y=sumallPC2+.1, label=site), size=5, check_overlap=F) +
+        geom_text(data=subset(sumallyrsVarout, variable =="sum_precip" | variable=="fivedayrunning12C"), aes(x=sumallPC1-0.3, y=sumallPC2+0.2, label=c("1","8")), size=7, color="dodgerblue4", fontface="bold.italic", check_overlap = F) +
+        geom_text(data=subset(sumallyrsVarout, variable=="fivedayrunning5C"), aes(x=sumallPC1-0.5, y=sumallPC2, label=c("7")), size=7, color="dodgerblue4", fontface="bold.italic", check_overlap = F) +
+        geom_text(data=subset(sumallyrsVarout, variable=="iceoff_GL4"), aes(x=sumallPC1, y=sumallPC2-0.1, label=c("6")), size=7, color="dodgerblue4", fontface="bold.italic", check_overlap = F) +
+        geom_text(data=subset(sumallyrsVarout, variable =="GSLthreedayneg3C"), aes(x=sumallPC1, y=sumallPC2-0.2, label=c("4")), size=7, color="dodgerblue4", fontface="bold.italic", check_overlap = T) +
+        geom_text(data=subset(sumallyrsVarout, variable =="sum_meanT"), aes(x=sumallPC1+.01, y=sumallPC2+0.2, label=c("2")), size=7, color="dodgerblue4", fontface="bold.italic", check_overlap = T) +
+        geom_text(data=subset(sumallyrsVarout, variable =="sum_moisturedeficit"), aes(x=sumallPC1, y=sumallPC2-0.2, label=c("5")), size=7, color="dodgerblue4", fontface="bold.italic", check_overlap = T) +
+        geom_text(data=subset(sumallyrsVarout, variable =="sum_PET"), aes(x=sumallPC1, y=sumallPC2, label=c("3")), size=7, color="dodgerblue4", fontface="bold.italic", check_overlap = T) +
+        #geom_text(data=subset(sumallyrsVarout, variable=="sum_GDD"), aes(x=sumallPC1, y=sumallPC2+0.02, label="GDD"), size=5, color="dodgerblue4", fontface="bold.italic", check_overlap = F) +
   #scale x and y by the minimum and maximum observed values 
   scale_y_continuous(limits=c(min(sumallyrsOutput$sumallPC2)-.2,max(sumallyrsOutput$sumallPC2)+.2)) + 
   scale_x_continuous(limits=c(min(sumallyrsOutput$sumallPC1)-.2,max(sumallyrsOutput$sumallPC1)+.2)) +
+        #scale_x_continuous(breaks=seq(from=-2, to=2, by=1),
+        #             limits=c(-2,2),
+        #             expand=c(0,0)) +
+        #scale_y_continuous(breaks=seq(from=-2, to=2, by=1),
+        #                   limits=c(-2,2),
+        #                   expand=c(0,0)) +
   #name axes with the proporiton of variance explained
   #xlab(paste("PC1 (",sprintf("%.1f",sumallPCA$CA$eig["PC1"]/sumallPCA$tot.chi*100,3),"%)",sep="")) +
   #ylab(paste("PC2 (",sprintf("%.1f",sumallPCA$CA$eig["PC2"]/sumallPCA$tot.chi*100,3),"%)",sep="")) +
-  labs(x="PC1 (Extended Summer)", y="PC2 (precipitation quantity") +
-  #add x and y zero lines
-  geom_hline(yintercept=0, linetype="dotted") +
-  geom_vline(xintercept=0, linetype="dotted") +
+  labs(x="PC1 (Extended Summer)", y="PC2 (precipitation quantity)") +
   #theme_bw() +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=18))
   theme_classic() +
         theme(text = element_text(size = text.size), 
-              axis.text.x = element_text(size=text.size), 
-              axis.text.y = element_text(size=text.size)) +
+              axis.text.x = element_text(size=18, margin=margin(10,5,5,5,"pt")), 
+              axis.text.y = element_text(size=18, margin=margin(5,10,5,5,"pt")),
+              axis.title.y = element_text(size=18, margin=margin(5,13,5, 5,"pt")),
+              axis.title.x= element_text(size=18, margin=margin(15,5,5,5, "pt"))) +
         plottheme
         
 #Make a graph of PC1 over time
@@ -202,17 +220,24 @@ dev.off()
 
 ## CW edit [3] -- remake Lauren's PC1 over time figure with color and thematic adjustments
 summer_overtime_v2 <- ggplot(pcouts2, aes(y=sumallPC1, x=year)) + 
-        geom_point(size=4, color="black") + 
-        geom_point(size=3, color="cyan3") +
         geom_line(size=1) +
+        geom_point(size=5, color="black") + 
+        geom_point(size=4, color="dodger blue4") +
         theme_classic() + 
         geom_smooth(method="lm", color="black") + 
         labs(x="Year", y="PC1 (Extended Summer)") +
-        scale_x_continuous(breaks=seq(from=1980, to=2015, by=5)) +
+        scale_x_continuous(breaks=seq(from=1980, to=2015, by=10),
+                           limits=c(1980, 2015),
+                           expand=c(0,0)) +
+        scale_y_continuous(breaks=seq(from=-2, to=2, by=1),
+                           limits=c(-2,2),
+                           expand=c(0,0)) +
         theme_classic() +
         theme(text = element_text(size = text.size), 
-              axis.text.x = element_text(size=text.size), 
-              axis.text.y = element_text(size=text.size)) +
+              axis.text.x = element_text(size=18, margin=margin(10,5,5,5,"pt")), 
+              axis.text.y = element_text(size=18, margin=margin(5,10,5,5,"pt")),
+              axis.title.y = element_text(size=18, margin=margin(5,13,5, 5,"pt")),
+              axis.title.x= element_text(size=18, margin=margin(15,5,5,5, "pt"))) +
         plottheme
 
 
@@ -277,7 +302,7 @@ ggplot(meltOutput, aes(x=year, y=PC1)) + geom_point() + geom_line() + geom_smoot
 
 #CW edit [4] -- add in ice out date by year and by PC1 with elevation shown (Fig 5 in renewal)
 iceout<-read.csv("~/Dropbox/NWT_data/NWT_GreenLakes_data/ice, climate and flow_D1_Dan.csv")
-elevation <- read.csv("~/Dropbox/NWT_data/iceout_lakes_elev.csv")
+elevation <- read.csv("~/Dropbox/NWT_data/NWT_GreenLakes_data/iceout_lakes_elev.csv")
 
 climate_iceout <- iceout[,c(1,3:9)]
 climate_iceout <- climate_iceout %>%
@@ -290,17 +315,28 @@ climate_iceout <- merge(climate_iceout, sumallyrsOutput, by="year")
 
 #plotting ice out by year
 IceoutPanel <- ggplot(climate_iceout, aes(year, DaysfromApril, color=Elevation_m)) + 
-        geom_point(size=4, color="black") +
-        geom_point(size=3) + 
-        scale_color_gradientn(colours=terrain.colors(7), name="Elevation (m)") +
-        geom_smooth(method="lm", color="black") +
-        scale_x_continuous(breaks=seq(from=1980, to =2015, by=5)) +
+        geom_point(size=2, color="black") +
+        geom_point(size=1) + 
+        scale_color_gradient2(high="deep sky blue1", low="springgreen3", midpoint=3400) +
+        #scale_color_gradient2ncolours=topo.colors(7), name="Elevation (m)") +
+        geom_smooth(method="lm", color="black", lwd=.5) +
+        scale_x_continuous(breaks=seq(from=1980, to =2015, by=5),
+                           limits=c(1980, 2015),
+                           expand=c(0,0)) +
+        scale_y_continuous(breaks=seq(from=0, to=150, by=25),
+                           limits=c(0,150),
+                           expand=c(0,0)) +
         labs(x="Year", y="Ice-off Date (days from April 1)") +
         theme_classic() +
-        theme(text = element_text(size = text.size), 
-              axis.text.x = element_text(size=text.size), 
-              axis.text.y = element_text(size=text.size)) +
+        theme(axis.text=element_text(size=8),
+              axis.title.x=element_blank(),
+              axis.text.x = element_text(margin=margin(3,5,5,5,"pt")),
+              axis.text.y = element_text(margin=margin(5,3, 5,5,"pt")),
+              axis.title.y = element_blank(),
+              #axis.title.y=element_text(size=text.size, margin=margin(5,13,5, 5,"pt")),
+              legend.position="none") +
         plottheme
+        #coord_fixed(ratio=1/10)
 
 #plotting ice out by PC1 -- 1/6/16: Katie wants to use this over ice out vs. year
 Iceout_byPC1 <- ggplot(climate_iceout, aes(sumallPC1, DaysfromApril, color=Elevation_m)) + 
@@ -337,7 +373,7 @@ multiplot <- plot_grid(summer_PCA, summer_overtime_v2, IceoutPanel,
 #3 panel plot with Ice out by PC1 substituted in
 multiplot_wPC1 <- plot_grid(summer_PCA, summer_overtime_v2, Iceout_byPC1,
                        nrow=2, 
-                       ncIcol=3,
+                       ncol=3,
                        align="h",
                        rel_widths = c(1,1,1.2))
 
@@ -355,3 +391,12 @@ Fig5 <- ggdraw() +
 save_plot('Fig5_revised_2.pdf', Fig5,
           base_height = 11,
           base_aspect_ratio = 1.3)
+
+#2 panel plot with 2 rows, PCA one top, PC1 by year on bottom -- Katies uses this for draft 3
+Fig5.3 <- plot_grid(summer_PCA, summer_overtime_v2,
+                    nrow=2,
+                    align="v")
+
+save_plot("Fig5_revised_3.pdf", Fig5.3,
+          base_height=9,
+          base_aspect_ratio=.5)
