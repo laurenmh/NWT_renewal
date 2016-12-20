@@ -183,10 +183,10 @@ summary(lm(DECE~sumallPC1,data=subset(dat6,class_3=="MM")))
 
 #List the most abundant species in each community type
 dat9<-dat6%>%
-  filter(class_3=="SB")%>%
+  filter(class_3=="FF")%>%
   select(ALGE:UNK)
 sort(colSums(dat9))
-
+colSums(dat9)
 
 #FF plot of abund vs. PC1 for abundant species
 datFF<-dat6%>%
@@ -366,6 +366,7 @@ names(dat15)[5]<-"Species"
 
 pdf("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/Proposals/NSFpreproposal2017/Figs/plantresponse2012acrosscommunitytype.pdf",height=4,width=5.6)
 ggplot(dat15,aes(x=class_3,y=mean,col=Species,group=Species)) +
+  theme(text = element_text(size=15)) +#legend.position="none",
   labs(x = "Community Type", y="Percent Cover") +
   geom_point(stat="identity",size=3,position=position_dodge(width=.5)) +
   geom_errorbar(aes(ymax=mean+se,ymin=mean-se),size=1,width=.1,position=position_dodge(width=.5)) +
@@ -568,7 +569,6 @@ dev.off()
 #ggplot(snow3,aes(x=max_snow,y=abun,color=species)) +
   #geom_point(stat="identity",size=.1) +
 #  geom_line(stat="smooth",method = "loess",size=.8)
-
 
 
 
