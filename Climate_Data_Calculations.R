@@ -385,8 +385,15 @@ plot(1982:2014,wholesite$spr_ppt,type="l",ylim=c(100,700))
 points(1982:2014,ClimateAll$spr_precip,type="l",col=2)
 plot(1982:2014,ClimateAll$moisturedeficit,type="l")
 
-#merge with climate data from whole site and saddle prod
+
+#Merge with climate data from whole site and saddle prod
+
+#Whole site data
+wholesite<-read.csv("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/wholesite/NWT_SiteData_2015-06-15.csv",na.strings = c("."))
+ind<-which(wholesite$water.year%in%1992:1997)
+wholesite[ind,c("saddleprod","dmsaddleprod","ffsaddleprod")]<-NA
 head(wholesite)
+
 ClimateAll<-cbind(ClimateAll,wholesite[,c(7,9)],wholesite[,15:20])
 ClimateAll<-cbind(ClimateAll,wholesite[,55:60])
 head(ClimateAll)
